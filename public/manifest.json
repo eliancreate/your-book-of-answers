@@ -1,0 +1,21 @@
+{
+  "name": "你的解答之書",
+  "short_name": "解答之書",
+  "description": "在這裡，你為自己創造，也為自己解惑。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#18181b",
+  "icons": [
+    {
+      "src": "./icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

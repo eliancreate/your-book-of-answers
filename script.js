@@ -1,0 +1,463 @@
+// Firebase imports from node_modules
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signInAnonymously, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc, updateDoc, getDocs, writeBatch, where, serverTimestamp, setDoc } from "firebase/firestore";
+
+// --- Firebase Configuration from .env file ---
+const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
+};
+const __app_id = import.meta.env.VITE_APP_ID || "my-answer-book-app";
+
+// 檢查配置是否完整
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    console.error("Firebase 配置不完整！請檢查您的 .env 檔案。");
+    alert("應用無法啟動，因為 Firebase 配置缺失。");
+    throw new Error("Missing Firebase configuration.");
+}
+
+// --- Global State ---
+let app, db, auth;
+let userId = null;
+let currentBookId = null;
+let allBooks = [];
+let currentBookAnswers = [];
+let authInitialized = false; 
+let booksUnsubscribe = null; 
+let answersUnsubscribe = null; 
+let isCreatingDefaultBook = false;
+let currentLanguage = localStorage.getItem('language') || 'zh';
+let isBooksLoading = true;
+
+// --- UI Elements ---
+let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal, modalMessage,
+    modalConfirmButton, modalCancelButton, modalCloseButton, settingsButton, authButton, themeToggleButton, sunIcon, moonIcon,
+    body, answerBookSelector, noAnswerBooksMessage, answerBooksList, addNewBookButton, backToHomeButton,
+    createBookModal, createBookNameInput, confirmCreateBookButton, cancelCreateBookButton,
+    displayBookName, inlineEditBookNameInput, editBookAnswersCountDisplay, noEditBookAnswersMessage,
+    editBookAnswersList, addNewAnswerButton, backToSettingsFromEditButton, deleteBookButton,
+    createAnswerModal, createAnswerTextInput, confirmCreateAnswerButton, cancelCreateAnswerButton,
+    languageSelector, authModal, closeAuthBtn, loginTab, registerTab, loginForm, registerForm, loginEmail,
+    loginPassword, registerEmail, registerPassword, registerConfirmPassword, loginButton,
+    registerButton, googleLoginButton, guestModeButton, userDisplayName, userEmail, loginRegisterButton,
+    logoutButton, mainTitle;
+
+// --- Translations & Default Data ---
+const translations = {
+    zh: { appTitle: "你的解答之書", cardFrontText: "點擊卡片以獲得你的答案", myBooks: "我的解答之書", noBooks: "目前沒有任何解答之書。", defaultBookName: "預設解答之書", loginSuccess: "登入成功", logoutSuccess: "登出成功", guestUser: "訪客", notLoggedIn: "未登入", loading: "載入中...", noAnswersInBook: "目前所選的解答之書中沒有答案。", bookNameRequired: "請輸入解答之書名稱", answerTextRequired: "請輸入解答內容", createBookSuccess: "解答之書建立成功！", createAnswerSuccess: "解答新增成功！", logoutConfirm: "你確定要登出嗎？", authError: "驗證錯誤", passwordMismatch: "密碼不一致", googleLoginButton: "使用 Google 登入" },
+    en: { appTitle: "Your Book of Answers", cardFrontText: "Click the card to get your answer", myBooks: "My Answer Books", noBooks: "No answer books available.", defaultBookName: "Default Answer Book", loginSuccess: "Login successful", logoutSuccess: "Logout successful", guestUser: "Guest", notLoggedIn: "Not logged in", loading: "Loading...", noAnswersInBook: "No answers in the selected answer book.", bookNameRequired: "Please enter answer book name", answerTextRequired: "Please enter answer text", createBookSuccess: "Answer book created successfully!", createAnswerSuccess: "Answer added successfully!", logoutConfirm: "Are you sure you want to log out?", authError: "Authentication Error", passwordMismatch: "Passwords do not match", googleLoginButton: "Sign in with Google" }
+};
+
+const defaultAnswersData = {
+    zh: [ "毫無疑問。", "這很可能。", "你說得對。", "所有的跡象都指向「是」。", "大膽去嘗試吧。", "信賴你的直覺。", "前景一片光明。", "絕對可以！", "這將會發生。", "你內心的聲音是對的。", "相信你自己。", "這是個好主意。", "現在正是時候。", "成功就在眼前。", "答案是肯定的。", "機會就在那裡。", "勇敢地前進吧。", "一切都會順利。", "相信你的心。", "這將會是個驚喜。", "運氣會站在你這邊。", "當然，為什麼不呢？", "答案顯而易見。", "相信時機。", "跟隨光明。", "不要指望它。", "我的回答是否定的。", "最好不要。", "現在最好不要透露。", "答案不明確，再問一次。", "專注於其他事情。", "這是個壞主意。", "暫緩行動，重新思考。", "現在不是最佳時機。", "未來並不樂觀。", "不，你應該換個方向。", "保持現狀。", "還有更好的選擇。", "另尋他法。", "這會帶來麻煩。", "最好還是別冒險。", "你應該再等等。", "這需要更多考慮。", "答案是否定的。", "拭目以待。", "問問你自己的心。", "答案在你心中。", "未來是個謎。", "只有時間會告訴你。", "換個方式再問一次。", "集中精神，再問一次。", "答案就在你身邊。", "這是個深奧的問題。", "答案還未浮現。", "命運還在書寫中。", "不要急著尋找答案。", "答案比你想像的更複雜。", "這取決於你的選擇。", "傾聽周遭的聲音。", "尋求不同的觀點。", "等待宇宙的訊息。", "答案會在適當的時候出現。", "現在還不是知道的時候。", "保持開放的心態。", "做好準備。", "勇敢地面對它。", "踏出第一步。", "保持耐心。", "改變你的視角。", "尋求幫助。", "順其自然。", "享受這個過程。", "找到平衡點。", "釋放你的恐懼。", "專注於當下。", "整理你的思緒。", "學習新事物。", "保持謙遜。", "做出一個決定。", "擁抱未知。", "重新評估。", "傾聽你的身體。", "休息一下。", "活在當下。", "答案就在你眼前，只是你沒看到。", "當然，只要你願意。", "星星說「也許」。", "這很明顯，不是嗎？", "去吃點好吃的，你會得到答案。", "答案在風中飄盪。", "你可能需要一杯咖啡。", "這是一個很好的問題。", "答案是個秘密。", "答案就在書裡。", "這需要一個更強大的力量來回答。", "相信魔法。", "答案就在你的夢裡。", "讓宇宙決定吧。", "答案在明天的咖啡裡。" ],
+    en: [ "Without a doubt.", "It is very likely.", "You are right.", "All signs point to yes.", "Go for it boldly.", "Trust your instincts.", "The outlook is bright.", "Absolutely!", "It will happen.", "Your inner voice is correct.", "Believe in yourself.", "This is a good idea.", "Now is the time.", "Success is within reach.", "The answer is yes.", "The opportunity is there.", "Move forward bravely.", "Everything will go smoothly.", "Trust your heart.", "This will be a surprise.", "Luck will be on your side.", "Sure, why not?", "The answer is clear.", "Trust the timing.", "Follow the light.", "Don't count on it.", "My answer is no.", "Better not.", "Better not tell now.", "Reply hazy, try again.", "Focus on something else.", "This is a bad idea.", "Pause and reconsider.", "Now is not the best time.", "The future doesn't look good.", "No, you should change direction.", "Forget about it.", "Maintain the status quo.", "There are better options.", "Look for another way.", "This will cause trouble.", "Better not take the risk.", "You should wait.", "This needs more consideration.", "The answer is no.", "Wait and see.", "Ask your own heart.", "The answer is within you.", "The future is a mystery.", "Only time will tell.", "Ask in a different way.", "Concentrate and ask again.", "The answer is around you.", "This is a profound question.", "The answer hasn't emerged yet.", "Fate is still being written.", "Don't rush to find the answer.", "The answer is more complex than you think.", "It depends on your choice.", "Listen to the voices around you.", "Seek different perspectives.", "Wait for the universe's message.", "The answer will appear at the right time.", "Now is not the time to know.", "Keep an open mind.", "Be prepared.", "Face it bravely.", "Take the first step.", "Be patient.", "Change your perspective.", "Seek help.", "Go with the flow.", "Enjoy the process.", "Find balance.", "Release your fears.", "Focus on the present.", "Organize your thoughts.", "Learn something new.", "Stay humble.", "Make a decision.", "Embrace the unknown.", "Reassess.", "Listen to your body.", "Take a break.", "Live in the present.", "The answer is right in front of you, you just don't see it.", "Of course, if you want to.", "The stars say maybe.", "Isn't it obvious?", "Go eat something good, you'll get the answer.", "The answer is floating in the wind.", "You might need a cup of coffee.", "That's a good question.", "The answer is a secret.", "The answer is in the book.", "This requires a more powerful force to answer.", "Believe in magic.", "The answer is in your dreams.", "Let the universe decide.", "The answer is in tomorrow's coffee." ]
+};
+
+// --- Helper Functions ---
+function getDefaultAnswers() { return defaultAnswersData[currentLanguage] || defaultAnswersData.zh; }
+function t(key) { return translations[currentLanguage][key] || key; }
+
+function updatePageText() {
+    document.title = t('appTitle');
+    if(mainTitle) mainTitle.textContent = t('appTitle');
+    if (cardContent) cardContent.textContent = t('cardFrontText');
+    if (googleLoginButton) googleLoginButton.querySelector('span').textContent = t('googleLoginButton');
+    if (auth) updateUserProfileUI(auth.currentUser);
+}
+
+async function createDefaultAnswerBook() {
+    if (isCreatingDefaultBook || !userId) return;
+    isCreatingDefaultBook = true;
+    try {
+        const booksRef = collection(db, `artifacts/${__app_id}/users/${userId}/answerBooks`);
+        const q = query(booksRef, where("name", "in", ["預設解答之書", "Default Answer Book"]));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            console.log("未找到預設解答之書，正在為新使用者建立。");
+            const newBookRef = await addDoc(booksRef, { userId, name: t('defaultBookName'), createdAt: serverTimestamp() });
+            const answersToUse = getDefaultAnswers();
+            const batch = writeBatch(db);
+            const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
+            answersToUse.forEach(answerText => {
+                const newAnswerRef = doc(answersRef);
+                batch.set(newAnswerRef, { bookId: newBookRef.id, text: answerText, createdAt: serverTimestamp() });
+            });
+            await batch.commit();
+            console.log("已匯入預設答案到預設書本。");
+        }
+    } catch (e) {
+        console.error("建立或檢查預設解答之書時發生錯誤:", e);
+    } finally {
+        isCreatingDefaultBook = false;
+    }
+}
+
+function showPage(page) {
+    if (!homePage || !settingsPage || !editBookPage) return;
+    homePage.classList.add('hidden');
+    settingsPage.classList.add('hidden');
+    editBookPage.classList.add('hidden');
+    page.classList.remove('hidden');
+}
+
+function setupBooksListener() {
+    if (booksUnsubscribe) booksUnsubscribe();
+    if (!userId) return;
+    const booksRef = collection(db, `artifacts/${__app_id}/users/${userId}/answerBooks`);
+    isBooksLoading = true;
+    updateAnswerBookSelector();
+    booksUnsubscribe = onSnapshot(booksRef, (snapshot) => {
+        allBooks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        answerBooksList.innerHTML = '';
+        allBooks.forEach(book => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between items-center p-4 rounded-lg cursor-pointer book-item';
+            const span = document.createElement('span');
+            span.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
+            li.appendChild(span);
+            li.addEventListener('click', () => editBook(book.id));
+            answerBooksList.appendChild(li);
+        });
+        isBooksLoading = false;
+        noAnswerBooksMessage.classList.toggle('hidden', allBooks.length > 0);
+        updateAnswerBookSelector();
+    }, (error) => {
+        console.error("書籍監聽失敗:", error);
+        isBooksLoading = false;
+    });
+}
+
+function editBook(bookId) {
+    const book = allBooks.find(b => b.id === bookId);
+    if (book) {
+        displayBookName.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
+        inlineEditBookNameInput.value = displayBookName.textContent;
+        showPage(editBookPage);
+        setupAnswersListener(book.id);
+    }
+}
+
+function setupAnswersListener(bookId) {
+    if (answersUnsubscribe) answersUnsubscribe();
+    if (!userId || !bookId) return;
+    currentBookId = bookId;
+    const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
+    const q = query(answersRef, where("bookId", "==", bookId));
+    answersUnsubscribe = onSnapshot(q, (snapshot) => {
+        currentBookAnswers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        editBookAnswersList.innerHTML = '';
+        currentBookAnswers.forEach(answer => {
+            const li = document.createElement('li');
+            li.className = 'flex justify-between items-center p-4 border-b answer-item';
+            const answerTextContainer = document.createElement('div');
+            answerTextContainer.className = 'flex-1 answer-text-container';
+            const answerDisplay = document.createElement('p');
+            answerDisplay.className = 'answer-display cursor-pointer pr-2';
+            answerDisplay.textContent = answer.text;
+            answerTextContainer.appendChild(answerDisplay);
+            li.appendChild(answerTextContainer);
+            editBookAnswersList.appendChild(li);
+        });
+        editBookAnswersCountDisplay.textContent = currentBookAnswers.length;
+        noEditBookAnswersMessage.classList.toggle('hidden', currentBookAnswers.length > 0);
+    }, (error) => console.error("答案監聽失敗:", error));
+}
+
+function updateAnswerBookSelector() {
+    answerBookSelector.innerHTML = '';
+    if (isBooksLoading) {
+        const option = document.createElement('option');
+        option.textContent = t('loading');
+        answerBookSelector.appendChild(option);
+        return;
+    }
+    if (allBooks.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = t('noBooks');
+        answerBookSelector.appendChild(option);
+    } else {
+        allBooks.forEach(book => {
+            const option = document.createElement('option');
+            option.value = book.id;
+            option.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
+            answerBookSelector.appendChild(option);
+        });
+        if (!currentBookId || !allBooks.some(b => b.id === currentBookId)) {
+            currentBookId = allBooks[0]?.id;
+        }
+        answerBookSelector.value = currentBookId;
+    }
+}
+
+async function getRandomAnswer() {
+    const selectedBookId = answerBookSelector.value;
+    if (!selectedBookId || !userId) return null;
+    const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
+    const q = query(answersRef, where("bookId", "==", selectedBookId));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    const answers = querySnapshot.docs.map(doc => doc.data().text);
+    return answers[Math.floor(Math.random() * answers.length)];
+}
+
+async function handleCardClick() {
+    const answer = await getRandomAnswer();
+    if (answer === null) {
+        showModal(t('noAnswersInBook'));
+        return;
+    }
+    cardContent.style.opacity = '0';
+    setTimeout(() => {
+        cardContent.textContent = answer;
+        cardContent.style.opacity = '1';
+    }, 400);
+}
+
+function toggleTheme() {
+    body.classList.toggle('dark');
+    body.classList.toggle('light');
+    sunIcon.classList.toggle('hidden');
+    moonIcon.classList.toggle('hidden');
+    localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+}
+
+function showToast(message, duration = 3000) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.className = 'toast-message';
+    if (document.body.classList.contains('dark')) toast.classList.add('dark');
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+function showModal(message, showConfirm = false, onConfirm = null) {
+    modalMessage.textContent = message;
+    const buttonsContainer = document.getElementById('modal-buttons-container');
+    if (showConfirm) {
+        buttonsContainer.classList.remove('hidden');
+        modalCloseButton.classList.add('hidden');
+        modalConfirmButton.onclick = () => { customModal.classList.add('hidden'); if (onConfirm) onConfirm(); };
+        modalCancelButton.onclick = () => { customModal.classList.add('hidden'); };
+    } else {
+        buttonsContainer.classList.add('hidden');
+        modalCloseButton.classList.remove('hidden');
+        modalCloseButton.onclick = () => { customModal.classList.add('hidden'); };
+    }
+    customModal.classList.remove('hidden');
+}
+
+async function registerUser(email, password) {
+    try {
+        await createUserWithEmailAndPassword(auth, email, password);
+    } catch (error) { showToast(t('authError') + ": " + error.message); }
+}
+
+async function loginUser(email, password) {
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) { showToast(t('authError') + ": " + error.message); }
+}
+
+async function loginWithGoogle() {
+    try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+    } catch (error) { showToast(t('authError') + ": " + error.message); }
+}
+
+async function logoutUser() {
+    try {
+        await signOut(auth);
+        showToast(t('logoutSuccess'));
+    } catch (error) { console.error("登出失敗:", error); }
+}
+
+function updateUserProfileUI(user) {
+    if (!userDisplayName || !userEmail || !logoutButton || !loginRegisterButton) return;
+    if (user && !user.isAnonymous) {
+        userDisplayName.textContent = user.displayName || user.email.split('@')[0];
+        userEmail.textContent = user.email;
+        logoutButton.classList.remove('hidden');
+        loginRegisterButton.classList.add('hidden');
+    } else {
+        userDisplayName.textContent = t('guestUser');
+        userEmail.textContent = t('notLoggedIn');
+        logoutButton.classList.add('hidden');
+        loginRegisterButton.classList.remove('hidden');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. Get All UI Elements ---
+    homePage = document.getElementById('home-page');
+    settingsPage = document.getElementById('settings-page');
+    editBookPage = document.getElementById('edit-book-page');
+    cardFlipArea = document.getElementById('card-click-area');
+    cardContent = document.getElementById('card-content');
+    customModal = document.getElementById('custom-modal');
+    modalMessage = document.getElementById('modal-message');
+    modalConfirmButton = document.getElementById('modal-confirm-button');
+    modalCancelButton = document.getElementById('modal-cancel-button');
+    modalCloseButton = document.getElementById('modal-close-button');
+    settingsButton = document.getElementById('settings-button');
+    authButton = document.getElementById('auth-button');
+    themeToggleButton = document.getElementById('theme-toggle');
+    sunIcon = document.getElementById('sun-icon');
+    moonIcon = document.getElementById('moon-icon');
+    body = document.body;
+    answerBookSelector = document.getElementById('answer-book-selector');
+    noAnswerBooksMessage = document.getElementById('no-answer-books-message');
+    answerBooksList = document.getElementById('answer-books-list');
+    addNewBookButton = document.getElementById('add-new-book-button');
+    backToHomeButton = document.getElementById('back-to-home-button');
+    createBookModal = document.getElementById('create-book-modal');
+    createBookNameInput = document.getElementById('create-book-name-input');
+    confirmCreateBookButton = document.getElementById('confirm-create-book-button');
+    cancelCreateBookButton = document.getElementById('cancel-create-book-button');
+    displayBookName = document.getElementById('display-book-name');
+    inlineEditBookNameInput = document.getElementById('inline-edit-book-name-input');
+    editBookAnswersCountDisplay = document.getElementById('edit-book-answers-count');
+    noEditBookAnswersMessage = document.getElementById('no-edit-book-answers-message');
+    editBookAnswersList = document.getElementById('edit-book-answers-list');
+    addNewAnswerButton = document.getElementById('add-new-answer-button');
+    backToSettingsFromEditButton = document.getElementById('back-to-settings-from-edit-button');
+    deleteBookButton = document.getElementById('delete-book-button');
+    createAnswerModal = document.getElementById('create-answer-modal');
+    createAnswerTextInput = document.getElementById('create-answer-text-input');
+    confirmCreateAnswerButton = document.getElementById('confirm-create-answer-button');
+    cancelCreateAnswerButton = document.getElementById('cancel-create-answer-button');
+    languageSelector = document.getElementById('language-selector');
+    authModal = document.getElementById('auth-modal');
+    closeAuthBtn = document.getElementById('auth-close-button');
+    loginTab = document.getElementById('login-tab');
+    registerTab = document.getElementById('register-tab');
+    loginForm = document.getElementById('login-form');
+    registerForm = document.getElementById('register-form');
+    loginEmail = document.getElementById('login-email');
+    loginPassword = document.getElementById('login-password');
+    registerEmail = document.getElementById('register-email');
+    registerPassword = document.getElementById('register-password');
+    registerConfirmPassword = document.getElementById('register-confirm-password');
+    loginButton = document.getElementById('login-button');
+    registerButton = document.getElementById('register-button');
+    googleLoginButton = document.getElementById('google-login-button');
+    guestModeButton = document.getElementById('guest-mode-button');
+    userDisplayName = document.getElementById('user-display-name');
+    userEmail = document.getElementById('user-email');
+    loginRegisterButton = document.getElementById('login-register-button');
+    logoutButton = document.getElementById('logout-button');
+    mainTitle = document.getElementById('main-title');
+
+    // --- 2. Setup Static Event Listeners ---
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') { body.classList.add('dark'); sunIcon.classList.add('hidden'); moonIcon.classList.remove('hidden'); } 
+    else { body.classList.add('light'); sunIcon.classList.remove('hidden'); moonIcon.classList.add('hidden'); }
+    languageSelector.value = currentLanguage;
+    
+    cardFlipArea.addEventListener('click', handleCardClick);
+    themeToggleButton.addEventListener('click', toggleTheme);
+    settingsButton.addEventListener('click', () => showPage(settingsPage));
+    backToHomeButton.addEventListener('click', () => showPage(homePage));
+    backToSettingsFromEditButton.addEventListener('click', () => showPage(settingsPage));
+    
+    addNewBookButton.addEventListener('click', () => createBookModal.classList.remove('hidden'));
+    cancelCreateBookButton.addEventListener('click', () => createBookModal.classList.add('hidden'));
+    confirmCreateBookButton.addEventListener('click', async () => {
+        const name = createBookNameInput.value.trim();
+        if (name) {
+            await createAnswerBook(name);
+            createBookNameInput.value = '';
+            createBookModal.classList.add('hidden');
+        } else { showToast(t('bookNameRequired')); }
+    });
+
+    addNewAnswerButton.addEventListener('click', () => createAnswerModal.classList.remove('hidden'));
+    cancelCreateAnswerButton.addEventListener('click', () => createAnswerModal.classList.add('hidden'));
+    confirmCreateAnswerButton.addEventListener('click', async () => {
+        const text = createAnswerTextInput.value.trim();
+        if (text) {
+            await addNewAnswer(text);
+            createAnswerTextInput.value = '';
+            createAnswerModal.classList.add('hidden');
+        } else { showToast(t('answerTextRequired')); }
+    });
+    
+    loginRegisterButton.addEventListener('click', () => authModal.classList.remove('hidden'));
+    closeAuthBtn.addEventListener('click', () => authModal.classList.add('hidden'));
+    authModal.addEventListener('click', (e) => { if (e.target === authModal) authModal.classList.add('hidden'); });
+    guestModeButton.addEventListener('click', () => authModal.classList.add('hidden'));
+    
+    loginTab.addEventListener('click', () => {
+        loginTab.classList.add('auth-tab-active'); registerTab.classList.remove('auth-tab-active');
+        loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
+    });
+    registerTab.addEventListener('click', () => {
+        registerTab.classList.add('auth-tab-active'); loginTab.classList.remove('auth-tab-active');
+        registerForm.classList.remove('hidden'); loginForm.classList.add('hidden');
+    });
+
+    loginButton.addEventListener('click', async () => {
+        if (loginEmail.value && loginPassword.value) await loginUser(loginEmail.value, loginPassword.value);
+    });
+    registerButton.addEventListener('click', async () => {
+        if (registerPassword.value !== registerConfirmPassword.value) { showToast(t('passwordMismatch')); return; }
+        if (registerEmail.value && registerPassword.value) await registerUser(registerEmail.value, registerPassword.value);
+    });
+    googleLoginButton.addEventListener('click', loginWithGoogle);
+    logoutButton.addEventListener('click', () => showModal(t('logoutConfirm'), true, logoutUser));
+
+    // --- 3. Initialize Firebase & Set Auth Listener ---
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            console.log("Auth state changed. User:", user ? user.uid : null);
+            if (booksUnsubscribe) booksUnsubscribe();
+            if (answersUnsubscribe) answersUnsubscribe();
+            
+            // **修正點：將 authButton 的點擊邏輯放在這裡，根據 user 狀態決定行為**
+            if (user && !user.isAnonymous) {
+                // 已登入的使用者 -> 按鈕功能為登出
+                authButton.onclick = () => showModal(t('logoutConfirm'), true, logoutUser);
+            } else {
+                // 訪客或未登入 -> 按鈕功能為打開登入視窗
+                authButton.onclick = () => authModal.classList.remove('hidden');
+            }
+            
+            updatePageText();
+
+            if (user) {
+                userId = user.uid;
+                await createDefaultAnswerBook();
+                setupBooksListener();
+                authModal.classList.add('hidden');
+                showPage(homePage);
+                if (authInitialized && !user.isAnonymous) showToast(t('loginSuccess'));
+            } else {
+                console.log("No user found, signing in anonymously...");
+                userId = null;
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error("Anonymous sign-in failed:", error);
+                    alert("無法啟用訪客模式，請檢查您的網路連線。");
+                }
+            }
+            authInitialized = true;
+        });
+    } catch (error) {
+        console.error("Firebase 初始化失敗:", error);
+        alert("無法連接到後端服務，請稍後再試。");
+    }
+});

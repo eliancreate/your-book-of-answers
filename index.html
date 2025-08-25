@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你的解答之書</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="manifest" href="/manifest.json">
+    
+    <script type="module" src="/script.js"></script>
+</head>
+<body class="min-h-screen flex flex-col font-sans light">
+    <div id="custom-modal" class="hidden fixed inset-0 flex justify-center items-center p-4 z-50 bg-black bg-opacity-50">
+        <div class="rounded-xl shadow-2xl p-6 w-full max-w-sm text-center modal-content">
+            <p id="modal-message" class="text-lg mb-6 font-medium"></p>
+            <div id="modal-buttons-container" class="hidden justify-center space-x-4">
+                <button id="modal-confirm-button" class="flex-1 font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    確定
+                </button>
+                <button id="modal-cancel-button" class="flex-1 font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    取消
+                </button>
+            </div>
+            <button id="modal-close-button" class="hidden w-full font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                關閉
+            </button>
+        </div>
+    </div>
+
+    <div class="absolute top-4 left-4 z-40 flex space-x-2 md:space-x-4">
+        <select id="language-selector" class="w-10 h-10 text-xs font-semibold rounded-full border transition duration-300 text-center bg-transparent cursor-pointer">
+            <option value="zh">中</option>
+            <option value="en">EN</option>
+        </select>
+        <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-full transition duration-300 transform hover:scale-105 text-sm md:text-base p-1">
+            <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
+            </svg>
+            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon hidden">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="absolute top-4 right-4 flex space-x-2 md:space-x-4 z-40">
+        <button id="settings-button" class="w-10 h-10 flex items-center justify-center rounded-full transition duration-300 transform hover:scale-105 text-sm md:text-base p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bookmark">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+            </svg>
+        </button>
+        <button id="auth-button" class="w-10 h-10 flex items-center justify-center rounded-full transition duration-300 transform hover:scale-105 text-sm md:text-base p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        </button>
+    </div>
+    
+    <main class="flex-1 flex flex-col items-center p-4 md:p-8 w-full max-w-full">
+        <header class="w-full max-w-4xl text-center mb-6 py-3 mt-16 md:mt-12">
+            <h2 id="main-title" class="font-semibold mb-2">你的解答之書</h2>
+        </header>
+
+        <div id="home-page" class="flex flex-col items-center w-full px-4 sm:px-0" style="min-height: 70vh;">
+            <div id="card-click-area" class="mt-8 md:mt-8 w-72 h-44 sm:w-80 sm:h-48 md:w-96 md:h-60 rounded-xl transition-all duration-300 ease-in-out cursor-pointer flex items-center justify-center p-4" style="position: relative; z-index: 10;">
+                <p id="card-content" class="text-lg sm:text-xl font-medium text-center transition-all duration-300">
+                    點擊卡片以獲得你的答案
+                </p>
+            </div>
+            <div class="flex justify-center mt-6">
+                <select id="answer-book-selector" class="block w-80 p-2 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-center">
+                    </select>
+            </div>
+        </div>
+
+        <div id="settings-page" class="hidden w-full max-w-xl rounded-xl shadow-2xl p-6 mt-4">
+            <div id="user-profile-section" class="mb-6 pb-6 border-b">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div>
+                            <h5 id="user-display-name" class="font-bold">訪客</h5>
+                            <p id="user-email" class="text-sm">未登入</p>
+                        </div>
+                        <button id="login-register-button" class="ml-3 w-10 h-10 flex items-center justify-center rounded-full transition duration-300 transform hover:scale-105 text-sm md:text-base p-1" title="登入/註冊">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <button id="logout-button" class="px-4 py-2 rounded-lg text-sm font-medium hidden">登出</button>
+                </div>
+            </div>
+            <div id="answer-book-management-section" class="mt-0">
+                <h5 class="text-center font-bold text-lg mb-4">我的解答之書</h5>
+                <p id="no-answer-books-message" class="text-center text-base hidden mb-4">目前沒有任何解答之書。</p>
+                <ul id="answer-books-list" class="space-y-3 custom-scrollbar max-h-60 overflow-y-auto pr-2">
+                    </ul>
+                <div class="flex justify-center mt-6">
+                    <button id="add-new-book-button" class="w-12 h-12 flex items-center justify-center rounded-full text-2xl font-bold shadow-md transition duration-300 ease-in-out transform hover:scale-110">
+                        +
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-center mt-6">
+                <button id="back-to-home-button" class="font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    回主頁
+                </button>
+            </div>
+        </div>
+        
+        <div id="auth-modal" class="hidden fixed inset-0 flex justify-center items-center p-4 z-50 bg-black bg-opacity-50">
+            <div class="rounded-xl shadow-2xl p-6 w-full max-w-sm text-center modal-content">
+                <h4 id="auth-modal-title" class="text-xl font-bold mb-4">登入/註冊</h4>
+                <div id="auth-tabs" class="flex justify-center mb-6">
+                    <button id="login-tab" class="px-4 py-2 font-medium rounded-l-lg auth-tab-active">登入</button>
+                    <button id="register-tab" class="px-4 py-2 font-medium rounded-r-lg">註冊</button>
+                </div>
+                <div id="login-form" class="mb-4">
+                    <div class="mb-4">
+                        <input type="email" id="login-email" placeholder="電子郵件" class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2">
+                    </div>
+                    <div class="mb-6">
+                        <input type="password" id="login-password" placeholder="密碼" class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2">
+                    </div>
+                    <button id="login-button" class="w-full font-bold py-3 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        登入
+                    </button>
+                </div>
+                <div id="register-form" class="mb-4 hidden">
+                    <div class="mb-4">
+                        <input type="email" id="register-email" placeholder="電子郵件" class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2">
+                    </div>
+                    <div class="mb-4">
+                        <input type="password" id="register-password" placeholder="密碼" class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2">
+                    </div>
+                    <div class="mb-6">
+                        <input type="password" id="register-confirm-password" placeholder="確認密碼" class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2">
+                    </div>
+                    <button id="register-button" class="w-full font-bold py-3 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        註冊
+                    </button>
+                </div>
+                <div class="mt-4">
+                    <button id="google-login-button" class="w-full font-bold py-3 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105 mb-3 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" class="mr-2">
+                            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                        </svg>
+                        <span id="google-login-text">使用 Google 登入</span>
+                    </button>
+                    <button id="guest-mode-button" class="w-full font-bold py-2 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        以訪客模式繼續
+                    </button>
+                </div>
+                <button id="auth-close-button" class="absolute top-4 right-4 text-xl font-bold">&times;</button>
+            </div>
+        </div>
+    
+        <div id="edit-book-page" class="hidden w-full max-w-xl rounded-xl shadow-2xl p-4 mt-0 flex flex-col" style="height: auto; max-height: 80vh; min-height: 400px; padding-bottom: 1.5rem;">
+            <div class="mb-6">
+                <div id="editable-book-name-container" class="relative flex items-center justify-between p-3 rounded-lg shadow-sm border transition duration-200 cursor-pointer group">
+                    <span id="display-book-name" class="flex-grow text-lg font-bold">書本名稱</span>
+                    <input type="text" id="inline-edit-book-name-input" class="absolute inset-0 w-full h-full p-3 rounded-lg bg-transparent border-none focus:outline-none text-lg font-bold hidden" />
+                </div>
+            </div>
+            <div class="flex flex-col mb-6 flex-1" style="overflow: visible;">
+                <h5 class="text-base font-semibold mb-2">書本中的解答 (<span id="edit-book-answers-count">0</span> 條)</h5>
+                <p id="no-edit-book-answers-message" class="text-center text-base hidden mb-2">目前沒有任何解答。</p>
+                <ul id="edit-book-answers-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar" style="max-height: 300px;">
+                    </ul>
+                <div class="flex justify-center mt-4 pb-3">
+                    <button id="add-new-answer-button" class="w-12 h-12 flex items-center justify-center rounded-full text-2xl font-bold shadow-md transition duration-300 ease-in-out transform hover:scale-110">
+                        +
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-center items-center space-x-4 mt-auto pt-4">
+                <button id="back-to-settings-from-edit-button" class="font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    返回設定
+                </button>
+                <button id="delete-book-button" class="font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    刪除書本
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="create-book-modal" class="hidden fixed inset-0 flex justify-center items-center p-4 z-50">
+        <div class="rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h4 class="text-xl font-bold mb-4 text-center">建立新的解答之書</h4>
+            <input type="text" id="create-book-name-input" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:border-transparent" placeholder="輸入書本名稱">
+            <div class="flex justify-center space-x-4">
+                <button id="confirm-create-book-button" class="flex-1 font-bold py-2 px-4 rounded-lg text-base shadow-md transition duration-300">
+                    建立
+                </button>
+                <button id="cancel-create-book-button" class="flex-1 font-bold py-2 px-4 rounded-lg text-base shadow-md transition duration-300">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="create-answer-modal" class="hidden fixed inset-0 flex justify-center items-center p-4 z-50">
+        <div class="rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h4 class="text-xl font-bold mb-4 text-center">新增解答</h4>
+            <textarea id="create-answer-text-input" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:border-transparent resize-y h-32" placeholder="輸入新的解答內容..."></textarea>
+            <div class="flex justify-center space-x-4">
+                <button id="confirm-create-answer-button" class="flex-1 font-bold py-2 px-4 rounded-lg text-base shadow-md transition duration-300">
+                    確定
+                </button>
+                <button id="cancel-create-answer-button" class="flex-1 font-bold py-2 px-4 rounded-lg text-base shadow-md transition duration-300">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js') // 路徑改為 /service-worker.js
+                .then(registration => {
+                    console.log('Service Worker 註冊成功:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Service Worker 註冊失敗:', error);
+                });
+        });
+    }
+    </script>
+</body>
+</html>
