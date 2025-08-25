@@ -463,37 +463,35 @@ body {
     ring-width: 2px;
 }
 
-/* --- [修改] 將此規則從 .delete-answer-btn 獨立出來，使其通用 --- */
 .delete-btn {
-    opacity: 1; /* 改為永遠顯示 */
+    opacity: 1;
     transition: color 0.2s ease-in-out;
     background-color: transparent;
     border: none;
     cursor: pointer;
-    font-size: 16px; /* 根據你的要求調整 */
+    font-size: 16px;
     line-height: 1;
     padding: 0 8px;
     font-weight: bold;
-    color: #94a3b8; /* Light Mode 的低調灰色 (slate-400) */
+    color: #94a3b8;
 }
 
 .delete-btn:hover {
-    color: #64748b; /* Light Mode 滑鼠懸停時的深灰色 (slate-500) */
+    color: #64748b;
 }
 
 .dark .delete-btn {
-    color: #475569; /* Dark Mode 的低調灰色 (slate-600) */
+    color: #475569;
 }
 
 .dark .delete-btn:hover {
-    color: #64748b; /* Dark Mode 滑鼠懸停時的亮灰色 (slate-500) */
+    color: #64748b;
 }
 
 
 /* --- Main Title Font Size --- */
 #main-title {
     font-size: 48px;
-    /* 確保預設顏色不會被覆蓋 */
     color: inherit;
 }
 @media (min-width: 768px) {
@@ -752,28 +750,28 @@ body.dark::before {
 /* --- 返回按鈕樣式 (低調漸層版) --- */
 
 .light #back-to-home-button, .light #back-to-settings-from-edit-button {
-    background: linear-gradient(135deg, #f1f5f9, #e2e8f0); /* 模仿背景的柔和漸層 */
-    color: #475569; /* slate-600 */
-    border: 1px solid rgba(203, 213, 225, 0.7); /* slate-300 with opacity */
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    color: #475569;
+    border: 1px solid rgba(203, 213, 225, 0.7);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.7);
     transition: all 0.3s ease;
 }
 .light #back-to-home-button:hover, .light #back-to-settings-from-edit-button:hover {
-    background: linear-gradient(135deg, #f8fafc, #e2e8f0); /* 懸停時更亮 */
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
     border-color: rgba(191, 201, 212, 0.9);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     transform: translateY(-1px);
 }
 
 .dark #back-to-home-button, .dark #back-to-settings-from-edit-button {
-    background: linear-gradient(135deg, #1e293b, #0f172a); /* 模仿背景的深色漸層 */
-    color: #cbd5e1; /* slate-300 */
-    border: 1px solid rgba(51, 65, 85, 0.8); /* slate-700 with opacity */
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #cbd5e1;
+    border: 1px solid rgba(51, 65, 85, 0.8);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(100, 116, 139, 0.2);
     transition: all 0.3s ease;
 }
 .dark #back-to-home-button:hover, .dark #back-to-settings-from-edit-button:hover {
-    background: linear-gradient(135deg, #334155, #1e293b); /* 懸停時更亮 */
+    background: linear-gradient(135deg, #334155, #1e293b);
     border-color: rgba(71, 85, 105, 0.9);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(100, 116, 139, 0.3);
     transform: translateY(-1px);
@@ -781,7 +779,7 @@ body.dark::before {
 /* --- 刪除按鈕樣式 (紅色玻璃質感) --- */
 
 .light #delete-book-button {
-    background: linear-gradient(145deg, rgba(246, 167, 167, 0.9), rgba(228, 50, 50, 0.8)); /* 淡紅色玻璃漸層 */
+    background: linear-gradient(145deg, rgba(246, 167, 167, 0.9), rgba(228, 50, 50, 0.8));
     backdrop-filter: blur(10px);
     color: #ffffff; 
     border: 1px solid rgba(239, 68, 68, 0.4);
@@ -789,7 +787,7 @@ body.dark::before {
     transition: all 0.3s ease;
 }
 .light #delete-book-button:hover {
-    background: linear-gradient(145deg, rgba(252, 165, 165, 0.95), rgba(239, 68, 68, 0.9)); /* 懸停時更紅 */
+    background: linear-gradient(145deg, rgba(252, 165, 165, 0.95), rgba(239, 68, 68, 0.9));
     color: #991b1b;
     border-color: rgba(220, 38, 38, 0.6);
     box-shadow: 0 6px 16px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -797,17 +795,53 @@ body.dark::before {
 }
 
 .dark #delete-book-button {
-    background: linear-gradient(145deg, rgba(153, 27, 27, 0.8), rgba(127, 29, 29, 0.7)); /* 深紅色玻璃漸層 */
+    background: linear-gradient(145deg, rgba(153, 27, 27, 0.8), rgba(127, 29, 29, 0.7));
     backdrop-filter: blur(10px);
-    color: #fca5a5; /* 亮紅色文字 */
+    color: #fca5a5;
     border: 1px solid rgba(239, 68, 68, 0.3);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(252, 165, 165, 0.15);
     transition: all 0.3s ease;
 }
 .dark #delete-book-button:hover {
-    background: linear-gradient(145deg, rgba(185, 28, 28, 0.9), rgba(153, 27, 27, 0.8)); /* 懸停時更亮 */
+    background: linear-gradient(145deg, rgba(185, 28, 28, 0.9), rgba(153, 27, 27, 0.8));
     color: #fecaca;
     border-color: rgba(248, 113, 113, 0.4);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(252, 165, 165, 0.2);
     transform: translateY(-1px);
+}
+
+/* --- [新增] Toast 通知樣式 --- */
+.toast-message {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 500;
+    z-index: 100;
+    
+    /* 動畫效果 */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* Light Mode 樣式 */
+    background: rgba(153, 180, 224, 0.9); /* slate-800 */
+    color: #f1f5f9; /* slate-100 */
+    backdrop-filter: blur(8px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Dark Mode 樣式 */
+.toast-message.dark {
+    background: rgba(24, 39, 56, 0.9); /* slate-100 */
+    color: #acb2bd; /* slate-800 */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }

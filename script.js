@@ -49,7 +49,7 @@ let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal
 
 // --- Translations & Default Data ---
 const translations = {
-    zh: { appTitle: "你的解答之書", cardFrontText: "點擊卡片以獲得你的答案", myBooks: "我的解答之書", noBooks: "目前沒有任何解答之書。", defaultBookName: "預設解答之書", loginSuccess: "登入成功", logoutSuccess: "登出成功", guestUser: "訪客", notLoggedIn: "未登入", loading: "載入中...", noAnswersInBook: "目前所選的解答之書中沒有答案。", bookNameRequired: "請輸入解答之書名稱", answerTextRequired: "請輸入解答內容", createBookSuccess: "解答之書建立成功！", createAnswerSuccess: "解答新增成功！", logoutConfirm: "你確定要登出嗎？", authError: "驗證錯誤", passwordMismatch: "密碼不一致", googleLoginButton: "使用 Google 登入", deleteBookConfirm: "確定要刪除這本書嗎？書中所有的答案將會一併被移除且無法復原。", bookDeleted: "解答之書已刪除", deleteError: "刪除失敗，請稍後再試", deleteAnswerConfirm: "確定要刪除這個答案嗎？", answerDeleted: "答案已刪除" },
+    zh: { appTitle: "你的解答之書", cardFrontText: "點擊卡片以獲得你的答案", myBooks: "我的解答之書", noBooks: "目前沒有任何解答之書。", defaultBookName: "預設解答之書", loginSuccess: "登入成功", logoutSuccess: "登出成功", guestUser: "訪客", notLoggedIn: "未登入", loading: "載入中...", noAnswersInBook: "目前所選的解答之書中沒有答案。", bookNameRequired: "請輸入解答之書名稱", answerTextRequired: "請輸入解答內容", createBookSuccess: "解答之書建立成功！", createAnswerSuccess: "解答新增成功！", logoutConfirm: "你確定要登出嗎？", authError: "驗證錯誤", passwordMismatch: "密碼不一致", googleLoginButton: "使用 Google 登入", deleteBookConfirm: "確定刪除？所有答案將一併被移除。", bookDeleted: "解答之書已刪除", deleteError: "刪除失敗，請稍後再試", deleteAnswerConfirm: "確定要刪除這個答案嗎？", answerDeleted: "答案已刪除" },
     en: { appTitle: "Your Book of Answers", cardFrontText: "Click the card to get your answer", myBooks: "My Answer Books", noBooks: "No answer books available.", defaultBookName: "Default Answer Book", loginSuccess: "Login successful", logoutSuccess: "Logout successful", guestUser: "Guest", notLoggedIn: "Not logged in", loading: "Loading...", noAnswersInBook: "No answers in the selected answer book.", bookNameRequired: "Please enter answer book name", answerTextRequired: "Please enter answer text", createBookSuccess: "Answer book created successfully!", createAnswerSuccess: "Answer added successfully!", logoutConfirm: "Are you sure you want to log out?", authError: "Authentication Error", passwordMismatch: "Passwords do not match", googleLoginButton: "Sign in with Google", deleteBookConfirm: "Are you sure you want to delete this book? All answers within it will be permanently removed.", bookDeleted: "Book deleted", deleteError: "Deletion failed, please try again later", deleteAnswerConfirm: "Are you sure you want to delete this answer?", answerDeleted: "Answer deleted" }
 };
 
@@ -252,7 +252,7 @@ function toggleTheme() {
     localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
 }
 
-function showToast(message, duration = 3000) {
+function showToast(message, duration = 500) {
     const toast = document.createElement('div');
     toast.textContent = message;
     toast.className = 'toast-message';
