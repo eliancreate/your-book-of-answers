@@ -49,8 +49,8 @@ let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal
 
 // --- Translations & Default Data ---
 const translations = {
-    zh: { appTitle: "你的解答之書", cardFrontText: "點擊卡片以獲得你的答案", myBooks: "我的解答之書", noBooks: "目前沒有任何解答之書。", defaultBookName: "預設解答之書", loginSuccess: "登入成功", logoutSuccess: "登出成功", guestUser: "訪客", notLoggedIn: "未登入", loading: "載入中...", noAnswersInBook: "目前所選的解答之書中沒有答案。", bookNameRequired: "請輸入解答之書名稱", answerTextRequired: "請輸入解答內容", createBookSuccess: "解答之書建立成功！", createAnswerSuccess: "解答新增成功！", logoutConfirm: "你確定要登出嗎？", authError: "驗證錯誤", passwordMismatch: "密碼不一致", googleLoginButton: "使用 Google 登入" },
-    en: { appTitle: "Your Book of Answers", cardFrontText: "Click the card to get your answer", myBooks: "My Answer Books", noBooks: "No answer books available.", defaultBookName: "Default Answer Book", loginSuccess: "Login successful", logoutSuccess: "Logout successful", guestUser: "Guest", notLoggedIn: "Not logged in", loading: "Loading...", noAnswersInBook: "No answers in the selected answer book.", bookNameRequired: "Please enter answer book name", answerTextRequired: "Please enter answer text", createBookSuccess: "Answer book created successfully!", createAnswerSuccess: "Answer added successfully!", logoutConfirm: "Are you sure you want to log out?", authError: "Authentication Error", passwordMismatch: "Passwords do not match", googleLoginButton: "Sign in with Google" }
+    zh: { appTitle: "你的解答之書", cardFrontText: "點擊卡片以獲得你的答案", myBooks: "我的解答之書", noBooks: "目前沒有任何解答之書。", defaultBookName: "預設解答之書", loginSuccess: "登入成功", logoutSuccess: "登出成功", guestUser: "訪客", notLoggedIn: "未登入", loading: "載入中...", noAnswersInBook: "目前所選的解答之書中沒有答案。", bookNameRequired: "請輸入解答之書名稱", answerTextRequired: "請輸入解答內容", createBookSuccess: "解答之書建立成功！", createAnswerSuccess: "解答新增成功！", logoutConfirm: "你確定要登出嗎？", authError: "驗證錯誤", passwordMismatch: "密碼不一致", googleLoginButton: "使用 Google 登入", deleteBookConfirm: "確定要刪除這本書嗎？書中所有的答案將會一併被移除且無法復原。", bookDeleted: "解答之書已刪除", deleteError: "刪除失敗，請稍後再試", deleteAnswerConfirm: "確定要刪除這個答案嗎？", answerDeleted: "答案已刪除" },
+    en: { appTitle: "Your Book of Answers", cardFrontText: "Click the card to get your answer", myBooks: "My Answer Books", noBooks: "No answer books available.", defaultBookName: "Default Answer Book", loginSuccess: "Login successful", logoutSuccess: "Logout successful", guestUser: "Guest", notLoggedIn: "Not logged in", loading: "Loading...", noAnswersInBook: "No answers in the selected answer book.", bookNameRequired: "Please enter answer book name", answerTextRequired: "Please enter answer text", createBookSuccess: "Answer book created successfully!", createAnswerSuccess: "Answer added successfully!", logoutConfirm: "Are you sure you want to log out?", authError: "Authentication Error", passwordMismatch: "Passwords do not match", googleLoginButton: "Sign in with Google", deleteBookConfirm: "Are you sure you want to delete this book? All answers within it will be permanently removed.", bookDeleted: "Book deleted", deleteError: "Deletion failed, please try again later", deleteAnswerConfirm: "Are you sure you want to delete this answer?", answerDeleted: "Answer deleted" }
 };
 
 const defaultAnswersData = {
@@ -117,10 +117,23 @@ function setupBooksListener() {
         allBooks.forEach(book => {
             const li = document.createElement('li');
             li.className = 'flex justify-between items-center p-4 rounded-lg cursor-pointer book-item';
+            
             const span = document.createElement('span');
             span.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
+            span.className = 'flex-grow';
+            span.addEventListener('click', () => editBook(book.id));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.className = 'delete-btn ml-4';
+            deleteBtn.title = 'Delete Book';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showModal(t('deleteBookConfirm'), true, () => deleteBook(book.id));
+            });
+            
             li.appendChild(span);
-            li.addEventListener('click', () => editBook(book.id));
+            li.appendChild(deleteBtn);
             answerBooksList.appendChild(li);
         });
         isBooksLoading = false;
@@ -135,6 +148,7 @@ function setupBooksListener() {
 function editBook(bookId) {
     const book = allBooks.find(b => b.id === bookId);
     if (book) {
+        currentBookId = bookId;
         displayBookName.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
         inlineEditBookNameInput.value = displayBookName.textContent;
         showPage(editBookPage);
@@ -154,13 +168,25 @@ function setupAnswersListener(bookId) {
         currentBookAnswers.forEach(answer => {
             const li = document.createElement('li');
             li.className = 'flex justify-between items-center p-4 border-b answer-item';
+            
             const answerTextContainer = document.createElement('div');
             answerTextContainer.className = 'flex-1 answer-text-container';
+            
             const answerDisplay = document.createElement('p');
             answerDisplay.className = 'answer-display cursor-pointer pr-2';
             answerDisplay.textContent = answer.text;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.className = 'delete-btn ml-4';
+            deleteBtn.title = 'Delete Answer';
+            deleteBtn.addEventListener('click', () => {
+                showModal(t('deleteAnswerConfirm'), true, () => deleteAnswer(answer.id));
+            });
+            
             answerTextContainer.appendChild(answerDisplay);
             li.appendChild(answerTextContainer);
+            li.appendChild(deleteBtn);
             editBookAnswersList.appendChild(li);
         });
         editBookAnswersCountDisplay.textContent = currentBookAnswers.length;
@@ -253,6 +279,80 @@ function showModal(message, showConfirm = false, onConfirm = null) {
         modalCloseButton.onclick = () => { customModal.classList.add('hidden'); };
     }
     customModal.classList.remove('hidden');
+}
+
+async function createAnswerBook(name) {
+    if (!userId) return;
+    const booksRef = collection(db, `artifacts/${__app_id}/users/${userId}/answerBooks`);
+    try {
+        await addDoc(booksRef, {
+            userId: userId,
+            name: name,
+            createdAt: serverTimestamp()
+        });
+        showToast(t('createBookSuccess'));
+    } catch (error) {
+        console.error("建立書本時出錯:", error);
+        showToast("建立失敗，請稍後再試");
+    }
+}
+
+// [新增] 新增解答的函式
+async function addNewAnswer(text) {
+    if (!userId || !currentBookId) return;
+    const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
+    try {
+        await addDoc(answersRef, {
+            bookId: currentBookId,
+            text: text,
+            createdAt: serverTimestamp()
+        });
+        showToast(t('createAnswerSuccess'));
+    } catch (error) {
+        console.error("新增答案時出錯:", error);
+        showToast("新增失敗，請稍後再試");
+    }
+}
+
+async function deleteBook(bookId) {
+    if (!userId) return;
+    try {
+        const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
+        const q = query(answersRef, where("bookId", "==", bookId));
+        const answersSnapshot = await getDocs(q);
+        
+        const batch = writeBatch(db);
+        
+        answersSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        
+        const bookRef = doc(db, `artifacts/${__app_id}/users/${userId}/answerBooks`, bookId);
+        batch.delete(bookRef);
+
+        await batch.commit();
+
+        showToast(t('bookDeleted'));
+        
+        if (currentBookId === bookId) {
+            showPage(settingsPage);
+        }
+    } catch (error) { 
+        console.error("刪除書本及其答案時出錯:", error); 
+        showToast(t('deleteError'));
+    }
+}
+
+async function deleteAnswer(answerId) {
+    if (!userId) return;
+    const answerRef = doc(db, `artifacts/${__app_id}/users/${userId}/answers`, answerId);
+    try {
+        await deleteDoc(answerRef);
+        showToast(t('answerDeleted'));
+    } catch (error) {
+        console.error("刪除答案時出錯:", error);
+        showToast(t('deleteError'));
+    }
 }
 
 async function registerUser(email, password) {
@@ -415,6 +515,16 @@ document.addEventListener('DOMContentLoaded', () => {
     googleLoginButton.addEventListener('click', loginWithGoogle);
     logoutButton.addEventListener('click', () => showModal(t('logoutConfirm'), true, logoutUser));
 
+    authButton.addEventListener('click', () => {
+        if (!auth) return;
+        const user = auth.currentUser;
+        if (user && !user.isAnonymous) {
+            showModal(t('logoutConfirm'), true, logoutUser);
+        } else {
+            authModal.classList.remove('hidden');
+        }
+    });
+
     // --- 3. Initialize Firebase & Set Auth Listener ---
     try {
         app = initializeApp(firebaseConfig);
@@ -425,15 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Auth state changed. User:", user ? user.uid : null);
             if (booksUnsubscribe) booksUnsubscribe();
             if (answersUnsubscribe) answersUnsubscribe();
-            
-            // **修正點：將 authButton 的點擊邏輯放在這裡，根據 user 狀態決定行為**
-            if (user && !user.isAnonymous) {
-                // 已登入的使用者 -> 按鈕功能為登出
-                authButton.onclick = () => showModal(t('logoutConfirm'), true, logoutUser);
-            } else {
-                // 訪客或未登入 -> 按鈕功能為打開登入視窗
-                authButton.onclick = () => authModal.classList.remove('hidden');
-            }
             
             updatePageText();
 
