@@ -184,10 +184,10 @@ body {
 
 .light #create-book-modal .rounded-lg,
 .light #create-answer-modal .rounded-lg {
-    background: linear-gradient(145deg, rgba(239, 246, 255, 0.95), rgba(245, 243, 255, 0.95)); /* From light-blue to light-violet */
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    color: #1e293b;
+    background: #ffffff; /* 改為純白背景 */
+    border: 1px solid #e5e7eb; /* 淺灰色邊框 */
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* 柔和的陰影 */
+    backdrop-filter: none;
     box-shadow: 
         0 20px 40px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -195,10 +195,9 @@ body {
 
 .dark #create-book-modal .rounded-lg,
 .dark #create-answer-modal .rounded-lg {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.9));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(51, 65, 85, 0.6);
-    color: #f1f5f9;
+     background: #1f2937; /* 深灰藍背景 */
+    border: 1px solid #374151; /* 邊框 */
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
     box-shadow: 
         0 20px 40px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(148, 163, 184, 0.1);
@@ -319,7 +318,7 @@ body {
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-.light #modal-confirm-button {
+.light #modal-confirm-button , .light #delete-book-button {
     background: linear-gradient(145deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
     color: #ffffff;
     border: none;
@@ -328,7 +327,7 @@ body {
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.light #modal-confirm-button:hover {
+.light #modal-confirm-button, .light #delete-book-button:hover {
     background: linear-gradient(145deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
     box-shadow: 
         0 6px 16px rgba(239, 68, 68, 0.4),
@@ -378,7 +377,7 @@ body {
         inset 0 1px 0 rgba(148, 163, 184, 0.1);
 }
 
-.dark #modal-confirm-button {
+.dark #modal-confirm-button , .dark #delete-book-button {
     background: linear-gradient(145deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
     color: #ffffff;
     border: none;
@@ -387,7 +386,7 @@ body {
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.dark #modal-confirm-button:hover {
+.dark #modal-confirm-button:hover , .dark #delete-book-button:hover {
     background: linear-gradient(145deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
     box-shadow: 
         0 6px 16px rgba(239, 68, 68, 0.5),
@@ -777,63 +776,31 @@ body.dark::before {
 
 /* --- 返回按鈕樣式 (低調漸層版) --- */
 
-.light #back-to-home-button, .light #back-to-settings-from-edit-button {
+.light #back-to-home-button, .light #back-to-settings-from-edit-button{
     background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
     color: #475569;
     border: 1px solid rgba(203, 213, 225, 0.7);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.7);
     transition: all 0.3s ease;
 }
-.light #back-to-home-button:hover, .light #back-to-settings-from-edit-button:hover {
+.light #back-to-home-button:hover, .light #back-to-settings-from-edit-button:hover{
     background: linear-gradient(135deg, #f8fafc, #e2e8f0);
     border-color: rgba(191, 201, 212, 0.9);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     transform: translateY(-1px);
 }
 
-.dark #back-to-home-button, .dark #back-to-settings-from-edit-button {
+.dark #back-to-home-button, .dark #back-to-settings-from-edit-button , .dark #cancel-create-book-button{
     background: linear-gradient(135deg, #1e293b, #0f172a);
     color: #cbd5e1;
     border: 1px solid rgba(51, 65, 85, 0.8);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(100, 116, 139, 0.2);
     transition: all 0.3s ease;
 }
-.dark #back-to-home-button:hover, .dark #back-to-settings-from-edit-button:hover {
+.dark #back-to-home-button:hover, .dark #back-to-settings-from-edit-button, .dark #cancel-create-book-button:hover{
     background: linear-gradient(135deg, #334155, #1e293b);
     border-color: rgba(71, 85, 105, 0.9);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(100, 116, 139, 0.3);
     transform: translateY(-1px);
 }
-/* --- 刪除按鈕樣式 (紅色玻璃質感) --- */
 
-.light #delete-book-button {
-    background: linear-gradient(145deg, rgba(246, 167, 167, 0.9), rgba(228, 50, 50, 0.8));
-    backdrop-filter: blur(10px);
-    color: #ffffff; 
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-    transition: all 0.3s ease;
-}
-.light #delete-book-button:hover {
-    background: linear-gradient(145deg, rgba(252, 165, 165, 0.95), rgba(239, 68, 68, 0.9));
-    color: #991b1b;
-    border-color: rgba(220, 38, 38, 0.6);
-    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    transform: translateY(-1px);
-}
-
-.dark #delete-book-button {
-    background: linear-gradient(145deg, rgba(153, 27, 27, 0.8), rgba(127, 29, 29, 0.7));
-    backdrop-filter: blur(10px);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(252, 165, 165, 0.15);
-    transition: all 0.3s ease;
-}
-.dark #delete-book-button:hover {
-    background: linear-gradient(145deg, rgba(185, 28, 28, 0.9), rgba(153, 27, 27, 0.8));
-    color: #fecaca;
-    border-color: rgba(248, 113, 113, 0.4);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(252, 165, 165, 0.2);
-    transform: translateY(-1px);
-}
