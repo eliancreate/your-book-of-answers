@@ -223,27 +223,29 @@ async function createDefaultAnswerBook() {
     isCreatingDefaultBook = true;
     try {
         const booksRef = collection(db, `artifacts/${__app_id}/users/${userId}/answerBooks`);
-        // --- 修改重點：現在會根據當前語言的翻譯來尋找預設書本 ---
-        const q = query(booksRef, where("name", "==", t('defaultBookName')));
+        // --- 修改重點：改為查詢 isDefault 標記 ---
+        const q = query(booksRef, where("isDefault", "==", true));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            console.log(`未找到 "${t('defaultBookName')}"，正在為使用者建立。`);
-            const newBookRef = await addDoc(booksRef, { userId, name: t('defaultBookName'), createdAt: serverTimestamp() });
-            
-            // getDefaultAnswers() 函式已經會根據 currentLanguage 取得正確的答案列表
+            console.log("未找到預設解答之書，正在為新使用者建立。");
+            // --- 修改重點：新增 isDefault: true 標記 ---
+            const newBookRef = await addDoc(booksRef, { 
+                userId, 
+                name: t('defaultBookName'), // 名稱仍然使用當前語言，方便首次查看
+                isDefault: true,           // 加上標記
+                createdAt: serverTimestamp() 
+            });
+
             const answersToUse = getDefaultAnswers();
             const batch = writeBatch(db);
             const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
-            
             answersToUse.forEach(answerText => {
                 const newAnswerRef = doc(answersRef);
                 batch.set(newAnswerRef, { bookId: newBookRef.id, text: answerText, createdAt: serverTimestamp() });
             });
             await batch.commit();
-            console.log(`已匯入 "${t('defaultBookName')}" 的預設答案。`);
-        } else {
-             console.log(`"${t('defaultBookName')}" 已存在。`);
+            console.log("已匯入預設答案到預設書本。");
         }
     } catch (e) {
         console.error("建立或檢查預設解答之書時發生錯誤:", e);
@@ -274,7 +276,8 @@ function setupBooksListener() {
             li.className = 'flex justify-between items-center p-4 rounded-lg cursor-pointer book-item';
             
             const span = document.createElement('span');
-            span.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
+            // --- 修改重點：根據 isDefault 標記來決定顯示名稱 ---
+            span.textContent = book.isDefault ? t('defaultBookName') : book.name;
             span.className = 'flex-grow';
             span.addEventListener('click', () => editBook(book.id));
 
@@ -295,14 +298,12 @@ function setupBooksListener() {
         noAnswerBooksMessage.classList.toggle('hidden', allBooks.length > 0);
         updateAnswerBookSelector();
 
-        // --- 優化重點：自動選中當前語言的預設書 ---
         if (allBooks.length > 0) {
-            const defaultBookForCurrentLang = allBooks.find(b => b.name === t('defaultBookName'));
+            const defaultBookForCurrentLang = allBooks.find(b => b.isDefault); // 改為尋找 isDefault
             if (defaultBookForCurrentLang) {
                 currentBookId = defaultBookForCurrentLang.id;
                 answerBookSelector.value = currentBookId;
             } else if (!allBooks.some(b => b.id === currentBookId)) {
-                // 如果當前選中的書被刪了，就選第一本
                 currentBookId = allBooks[0].id;
                 answerBookSelector.value = currentBookId;
             }
@@ -318,8 +319,10 @@ function editBook(bookId) {
     const book = allBooks.find(b => b.id === bookId);
     if (book) {
         currentBookId = bookId;
-        displayBookName.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
-        inlineEditBookNameInput.value = displayBookName.textContent;
+        // --- 修改重點：根據 isDefault 標記來決定顯示名稱 ---
+        const bookName = book.isDefault ? t('defaultBookName') : book.name;
+        displayBookName.textContent = bookName;
+        inlineEditBookNameInput.value = bookName;
         showPage(editBookPage);
         setupAnswersListener(book.id);
     }
@@ -379,7 +382,8 @@ function updateAnswerBookSelector() {
         allBooks.forEach(book => {
             const option = document.createElement('option');
             option.value = book.id;
-            option.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
+            // --- 修改重點：根據 isDefault 標記來決定顯示名稱 ---
+            option.textContent = book.isDefault ? t('defaultBookName') : book.name;
             answerBookSelector.appendChild(option);
         });
         if (!currentBookId || !allBooks.some(b => b.id === currentBookId)) {
