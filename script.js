@@ -49,12 +49,104 @@ let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal
 
 // --- Translations & Default Data ---
 const translations = {
-    zh: { appTitle: "你的解答之書", cardFrontText: "點擊卡片以獲得你的答案", myBooks: "我的解答之書", noBooks: "目前沒有任何解答之書。", defaultBookName: "預設解答之書", loginSuccess: "登入成功", logoutSuccess: "登出成功", guestUser: "訪客", notLoggedIn: "未登入", loading: "載入中...", noAnswersInBook: "目前所選的解答之書中沒有答案。", bookNameRequired: "請輸入解答之書名稱", answerTextRequired: "請輸入解答內容", createBookSuccess: "解答之書建立成功！", createAnswerSuccess: "解答新增成功！", logoutConfirm: "你確定要登出嗎？", authError: "驗證錯誤", passwordMismatch: "密碼不一致", googleLoginButton: "使用 Google 登入", deleteBookConfirm: "確定刪除？所有答案將一併被移除。", bookDeleted: "解答之書已刪除", deleteError: "刪除失敗，請稍後再試", deleteAnswerConfirm: "確定要刪除這個答案嗎？", answerDeleted: "答案已刪除" },
-    en: { appTitle: "Your Book of Answers", cardFrontText: "Click the card to get your answer", myBooks: "My Answer Books", noBooks: "No answer books available.", defaultBookName: "Default Answer Book", loginSuccess: "Login successful", logoutSuccess: "Logout successful", guestUser: "Guest", notLoggedIn: "Not logged in", loading: "Loading...", noAnswersInBook: "No answers in the selected answer book.", bookNameRequired: "Please enter answer book name", answerTextRequired: "Please enter answer text", createBookSuccess: "Answer book created successfully!", createAnswerSuccess: "Answer added successfully!", logoutConfirm: "Are you sure you want to log out?", authError: "Authentication Error", passwordMismatch: "Passwords do not match", googleLoginButton: "Sign in with Google", deleteBookConfirm: "Are you sure you want to delete this book? All answers within it will be permanently removed.", bookDeleted: "Book deleted", deleteError: "Deletion failed, please try again later", deleteAnswerConfirm: "Are you sure you want to delete this answer?", answerDeleted: "Answer deleted" }
+    zh: {
+        appTitle: "你的解答之書",
+        cardFrontText: "點擊卡片以獲得你的答案",
+        myBooks: "我的解答之書",
+        noBooks: "目前沒有任何解答之書。",
+        defaultBookName: "預設解答之書",
+        loginSuccess: "登入成功",
+        logoutSuccess: "登出成功",
+        guestUser: "訪客",
+        notLoggedIn: "未登入",
+        loading: "載入中...",
+        noAnswersInBook: "目前所選的解答之書中沒有答案。",
+        bookNameRequired: "請輸入解答之書名稱",
+        answerTextRequired: "請輸入解答內容",
+        createBookSuccess: "解答之書建立成功！",
+        createAnswerSuccess: "解答新增成功！",
+        logoutConfirm: "你確定要登出嗎？",
+        authError: "驗證錯誤",
+        passwordMismatch: "密碼不一致",
+        googleLoginButton: "使用 Google 登入",
+        deleteBookConfirm: "確定刪除？所有答案將一併被移除。",
+        bookDeleted: "解答之書已刪除",
+        deleteError: "刪除失敗，請稍後再試",
+        deleteAnswerConfirm: "確定要刪除這個答案嗎？",
+        answerDeleted: "答案已刪除",
+        confirm: "確定",
+        cancel: "取消",
+        close: "關閉",
+        backToHome: "回主頁",
+        backToSettings: "返回設定",
+        deleteBook: "刪除書本",
+        logout: "登出",
+        loginRegister: "登入/註冊",
+        login: "登入",
+        register: "註冊",
+        continueAsGuest: "以訪客模式繼續",
+        createBookTitle: "建立新的解答之書",
+        create: "建立",
+        addNewAnswerTitle: "新增解答",
+        answersInBook: "書本中的解答",
+        answersCountUnit: "條",
+        // --- 新增部分 ---
+        bookNamePlaceholder: "輸入書本名稱",
+        answerTextPlaceholder: "輸入新的解答內容...",
+        noBooksMessage: "目前沒有任何解答之書。",
+        noAnswersMessage: "目前沒有任何解答。"
+    },
+    en: {
+        appTitle: "Your Book of Answers",
+        cardFrontText: "Click the card to get your answer",
+        myBooks: "My Books",
+        noBooks: "No books available.",
+        defaultBookName: "Default Book of Answers",
+        loginSuccess: "Login successful",
+        logoutSuccess: "Logout successful",
+        guestUser: "Guest",
+        notLoggedIn: "Not logged in",
+        loading: "Loading...",
+        noAnswersInBook: "No answers in the selected book.",
+        bookNameRequired: "Please enter book name",
+        answerTextRequired: "Please enter answer text",
+        createBookSuccess: "Book created successfully!",
+        createAnswerSuccess: "Answer added successfully!",
+        logoutConfirm: "Are you sure you want to log out?",
+        authError: "Authentication Error",
+        passwordMismatch: "Passwords do not match",
+        googleLoginButton: "Sign in with Google",
+        deleteBookConfirm: "Are you sure? All answers within it will be permanently removed.",
+        bookDeleted: "Book deleted",
+        deleteError: "Deletion failed, please try again later",
+        deleteAnswerConfirm: "Are you sure you want to delete this answer?",
+        answerDeleted: "Answer deleted",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        close: "Close",
+        backToHome: "Back to Home",
+        backToSettings: "Back to Settings",
+        deleteBook: "Delete Book",
+        logout: "Logout",
+        loginRegister: "Login/Register",
+        login: "Login",
+        register: "Register",
+        continueAsGuest: "Continue as Guest",
+        createBookTitle: "Create New Book",
+        create: "Create",
+        addNewAnswerTitle: "Add New Answer",
+        answersInBook: "Answers in Book",
+        answersCountUnit: "items",
+        // --- 新增部分 ---
+        bookNamePlaceholder: "Enter book name",
+        answerTextPlaceholder: "Enter new answer text...",
+        noBooksMessage: "No books available.",
+        noAnswersMessage: "No answers available."
+    }
 };
 
 const defaultAnswersData = {
-    zh: [ "毫無疑問。", "這很可能。", "你說得對。", "所有的跡象都指向「是」。", "大膽去嘗試吧。", "信賴你的直覺。", "前景一片光明。", "絕對可以！", "這將會發生。", "你內心的聲音是對的。", "相信你自己。", "這是個好主意。", "現在正是時候。", "成功就在眼前。", "答案是肯定的。", "機會就在那裡。", "勇敢地前進吧。", "一切都會順利。", "相信你的心。", "這將會是個驚喜。", "運氣會站在你這邊。", "當然，為什麼不呢？", "答案顯而易見。", "相信時機。", "跟隨光明。", "不要指望它。", "我的回答是否定的。", "最好不要。", "現在最好不要透露。", "答案不明確，再問一次。", "專注於其他事情。", "這是個壞主意。", "暫緩行動，重新思考。", "現在不是最佳時機。", "未來並不樂觀。", "不，你應該換個方向。", "保持現狀。", "還有更好的選擇。", "另尋他法。", "這會帶來麻煩。", "最好還是別冒險。", "你應該再等等。", "這需要更多考慮。", "答案是否定的。", "拭目以待。", "問問你自己的心。", "答案在你心中。", "未來是個謎。", "只有時間會告訴你。", "換個方式再問一次。", "集中精神，再問一次。", "答案就在你身邊。", "這是個深奧的問題。", "答案還未浮現。", "命運還在書寫中。", "不要急著尋找答案。", "答案比你想像的更複雜。", "這取決於你的選擇。", "傾聽周遭的聲音。", "尋求不同的觀點。", "等待宇宙的訊息。", "答案會在適當的時候出現。", "現在還不是知道的時候。", "保持開放的心態。", "做好準備。", "勇敢地面對它。", "踏出第一步。", "保持耐心。", "改變你的視角。", "尋求幫助。", "順其自然。", "享受這個過程。", "找到平衡點。", "釋放你的恐懼。", "專注於當下。", "整理你的思緒。", "學習新事物。", "保持謙遜。", "做出一個決定。", "擁抱未知。", "重新評估。", "傾聽你的身體。", "休息一下。", "活在當下。", "答案就在你眼前，只是你沒看到。", "當然，只要你願意。", "星星說「也許」。", "這很明顯，不是嗎？", "去吃點好吃的，你會得到答案。", "答案在風中飄盪。", "你可能需要一杯咖啡。", "這是一個很好的問題。", "答案是個秘密。", "答案就在書裡。", "這需要一個更強大的力量來回答。", "相信魔法。", "答案就在你的夢裡。", "讓宇宙決定吧。", "答案在明天的咖啡裡。" ],
+    zh: [ "毫無疑問。", "這很可能。", "你說得對。", "所有的跡象都指向「是」。", "大膽去嘗試吧。", "信賴你的直覺。", "前景一片光明。", "絕對可以！", "這將會發生。", "你內心的聲音是對的。", "相信你自己。", "這是個好主意。", "現在正是時候。", "成功就在眼前。", "答案是肯定的。", "機會就在那裡。", "勇敢地前進吧。", "一切都會順利。", "相信你的心。", "這將會是個驚喜。", "運氣會站在你這邊。", "當然，為什麼不呢？", "答案顯而易見。", "相信時機。", "跟隨光明。", "不要指望它。", "我的回答是否定的。", "最好不要。", "現在最好不要透露。", "答案不明確，再問一次。", "專注於其他事情。", "這是個壞主意。", "暫緩行動，重新思考。", "現在不是最佳時機。", "未來並不樂觀。", "不，你應該換個方向。", "忘了它吧。", "保持現狀。", "還有更好的選擇。", "另尋他法。", "這會帶來麻煩。", "最好還是別冒險。", "你應該再等等。", "這需要更多考慮。", "答案是否定的。", "拭目以待。", "問問你自己的心。", "答案在你心中。", "未來是個謎。", "只有時間會告訴你。", "換個方式再問一次。", "集中精神，再問一次。", "答案就在你身邊。", "這是個深奧的問題。", "答案還未浮現。", "命運還在書寫中。", "不要急著尋找答案。", "答案比你想像的更複雜。", "這取決於你的選擇。", "傾聽周遭的聲音。", "尋求不同的觀點。", "等待宇宙的訊息。", "答案會在適當的時候出現。", "現在還不是知道的時候。", "保持開放的心態。", "做好準備。", "勇敢地面對它。", "踏出第一步。", "保持耐心。", "改變你的視角。", "尋求幫助。", "順其自然。", "享受這個過程。", "找到平衡點。", "釋放你的恐懼。", "專注於當下。", "整理你的思緒。", "學習新事物。", "保持謙遜。", "做出一個決定。", "擁抱未知。", "重新評估。", "傾聽你的身體。", "休息一下。", "活在當下。", "答案就在你眼前，只是你沒看到。", "當然，只要你願意。", "星星說「也許」。", "這很明顯，不是嗎？", "去吃點好吃的，你會得到答案。", "答案在風中飄盪。", "你可能需要一杯咖啡。", "這是一個很好的問題。", "答案是個秘密。", "答案就在書裡。", "這需要一個更強大的力量來回答。", "相信魔法。", "答案就在你的夢裡。", "讓宇宙決定吧。", "答案在明天的咖啡裡。" ],
     en: [ "Without a doubt.", "It is very likely.", "You are right.", "All signs point to yes.", "Go for it boldly.", "Trust your instincts.", "The outlook is bright.", "Absolutely!", "It will happen.", "Your inner voice is correct.", "Believe in yourself.", "This is a good idea.", "Now is the time.", "Success is within reach.", "The answer is yes.", "The opportunity is there.", "Move forward bravely.", "Everything will go smoothly.", "Trust your heart.", "This will be a surprise.", "Luck will be on your side.", "Sure, why not?", "The answer is clear.", "Trust the timing.", "Follow the light.", "Don't count on it.", "My answer is no.", "Better not.", "Better not tell now.", "Reply hazy, try again.", "Focus on something else.", "This is a bad idea.", "Pause and reconsider.", "Now is not the best time.", "The future doesn't look good.", "No, you should change direction.", "Forget about it.", "Maintain the status quo.", "There are better options.", "Look for another way.", "This will cause trouble.", "Better not take the risk.", "You should wait.", "This needs more consideration.", "The answer is no.", "Wait and see.", "Ask your own heart.", "The answer is within you.", "The future is a mystery.", "Only time will tell.", "Ask in a different way.", "Concentrate and ask again.", "The answer is around you.", "This is a profound question.", "The answer hasn't emerged yet.", "Fate is still being written.", "Don't rush to find the answer.", "The answer is more complex than you think.", "It depends on your choice.", "Listen to the voices around you.", "Seek different perspectives.", "Wait for the universe's message.", "The answer will appear at the right time.", "Now is not the time to know.", "Keep an open mind.", "Be prepared.", "Face it bravely.", "Take the first step.", "Be patient.", "Change your perspective.", "Seek help.", "Go with the flow.", "Enjoy the process.", "Find balance.", "Release your fears.", "Focus on the present.", "Organize your thoughts.", "Learn something new.", "Stay humble.", "Make a decision.", "Embrace the unknown.", "Reassess.", "Listen to your body.", "Take a break.", "Live in the present.", "The answer is right in front of you, you just don't see it.", "Of course, if you want to.", "The stars say maybe.", "Isn't it obvious?", "Go eat something good, you'll get the answer.", "The answer is floating in the wind.", "You might need a cup of coffee.", "That's a good question.", "The answer is a secret.", "The answer is in the book.", "This requires a more powerful force to answer.", "Believe in magic.", "The answer is in your dreams.", "Let the universe decide.", "The answer is in tomorrow's coffee." ]
 };
 
@@ -63,11 +155,67 @@ function getDefaultAnswers() { return defaultAnswersData[currentLanguage] || def
 function t(key) { return translations[currentLanguage][key] || key; }
 
 function updatePageText() {
+    // Helper function to set text content if element exists
+    const setText = (id, key, attr = 'textContent') => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (id === 'google-login-button') {
+                element.querySelector('span').textContent = t(key);
+            } else {
+                element[attr] = t(key);
+            }
+        }
+    };
+
     document.title = t('appTitle');
-    if(mainTitle) mainTitle.textContent = t('appTitle');
+    if (mainTitle) mainTitle.textContent = t('appTitle');
     if (cardContent) cardContent.textContent = t('cardFrontText');
-    if (googleLoginButton) googleLoginButton.querySelector('span').textContent = t('googleLoginButton');
     if (auth) updateUserProfileUI(auth.currentUser);
+
+    // --- 更新所有按鈕和標籤 ---
+    setText('modal-confirm-button', 'confirm');
+    setText('modal-cancel-button', 'cancel');
+    setText('modal-close-button', 'close');
+    setText('logout-button', 'logout');
+    setText('back-to-home-button', 'backToHome');
+    setText('back-to-settings-from-edit-button', 'backToSettings');
+    setText('delete-book-button', 'deleteBook');
+    
+    // Auth Modal
+    setText('auth-modal-title', 'loginRegister');
+    setText('login-tab', 'login');
+    setText('register-tab', 'register');
+    setText('login-button', 'login');
+    setText('register-button', 'register');
+    setText('guest-mode-button', 'continueAsGuest');
+
+    // Create Book Modal & Placeholders
+    const createBookTitle = document.querySelector('#create-book-modal h4');
+    if (createBookTitle) createBookTitle.textContent = t('createBookTitle');
+    setText('confirm-create-book-button', 'create');
+    setText('cancel-create-book-button', 'cancel');
+    setText('create-book-name-input', 'bookNamePlaceholder', 'placeholder'); // 翻譯 placeholder
+
+    // Create Answer Modal & Placeholders
+    const createAnswerTitle = document.querySelector('#create-answer-modal h4');
+    if (createAnswerTitle) createAnswerTitle.textContent = t('addNewAnswerTitle');
+    setText('confirm-create-answer-button', 'confirm');
+    setText('cancel-create-answer-button', 'cancel');
+    setText('create-answer-text-input', 'answerTextPlaceholder', 'placeholder'); // 翻譯 placeholder
+
+    // Settings Page & Messages
+    setText('my-books-title', 'myBooks');
+    setText('no-answer-books-message', 'noBooksMessage');
+
+    // Edit Book Page & Messages
+    const editBookAnswersTitle = document.getElementById('edit-book-answers-title');
+   if (editBookAnswersTitle) {
+    editBookAnswersTitle.innerHTML = `${t('answersInBook')} (<span id="edit-book-answers-count">${currentBookAnswers.length}</span> ${t('answersCountUnit')})`;
+    
+    // --- 關鍵修正 ---
+    editBookAnswersCountDisplay = document.getElementById('edit-book-answers-count');
+}
+    setText('no-edit-book-answers-message', 'noAnswersMessage');
 }
 
 async function createDefaultAnswerBook() {
@@ -75,20 +223,27 @@ async function createDefaultAnswerBook() {
     isCreatingDefaultBook = true;
     try {
         const booksRef = collection(db, `artifacts/${__app_id}/users/${userId}/answerBooks`);
-        const q = query(booksRef, where("name", "in", ["預設解答之書", "Default Answer Book"]));
+        // --- 修改重點：現在會根據當前語言的翻譯來尋找預設書本 ---
+        const q = query(booksRef, where("name", "==", t('defaultBookName')));
         const querySnapshot = await getDocs(q);
+
         if (querySnapshot.empty) {
-            console.log("未找到預設解答之書，正在為新使用者建立。");
+            console.log(`未找到 "${t('defaultBookName')}"，正在為使用者建立。`);
             const newBookRef = await addDoc(booksRef, { userId, name: t('defaultBookName'), createdAt: serverTimestamp() });
+            
+            // getDefaultAnswers() 函式已經會根據 currentLanguage 取得正確的答案列表
             const answersToUse = getDefaultAnswers();
             const batch = writeBatch(db);
             const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
+            
             answersToUse.forEach(answerText => {
                 const newAnswerRef = doc(answersRef);
                 batch.set(newAnswerRef, { bookId: newBookRef.id, text: answerText, createdAt: serverTimestamp() });
             });
             await batch.commit();
-            console.log("已匯入預設答案到預設書本。");
+            console.log(`已匯入 "${t('defaultBookName')}" 的預設答案。`);
+        } else {
+             console.log(`"${t('defaultBookName')}" 已存在。`);
         }
     } catch (e) {
         console.error("建立或檢查預設解答之書時發生錯誤:", e);
@@ -139,6 +294,20 @@ function setupBooksListener() {
         isBooksLoading = false;
         noAnswerBooksMessage.classList.toggle('hidden', allBooks.length > 0);
         updateAnswerBookSelector();
+
+        // --- 優化重點：自動選中當前語言的預設書 ---
+        if (allBooks.length > 0) {
+            const defaultBookForCurrentLang = allBooks.find(b => b.name === t('defaultBookName'));
+            if (defaultBookForCurrentLang) {
+                currentBookId = defaultBookForCurrentLang.id;
+                answerBookSelector.value = currentBookId;
+            } else if (!allBooks.some(b => b.id === currentBookId)) {
+                // 如果當前選中的書被刪了，就選第一本
+                currentBookId = allBooks[0].id;
+                answerBookSelector.value = currentBookId;
+            }
+        }
+        
     }, (error) => {
         console.error("書籍監聽失敗:", error);
         isBooksLoading = false;
@@ -333,6 +502,7 @@ async function deleteBook(bookId) {
         await batch.commit();
 
         showToast(t('bookDeleted'));
+        showPage(settingsPage);
         
         if (currentBookId === bookId) {
             showPage(settingsPage);
@@ -463,11 +633,37 @@ document.addEventListener('DOMContentLoaded', () => {
     else { body.classList.add('light'); sunIcon.classList.remove('hidden'); moonIcon.classList.add('hidden'); }
     languageSelector.value = currentLanguage;
     
+    languageSelector.addEventListener('change', (e) => {
+        currentLanguage = e.target.value;
+        localStorage.setItem('language', currentLanguage);
+
+        // 切換語言後，檢查並確保該語言的預設書本存在
+        createDefaultAnswerBook();
+
+        updatePageText();
+        setupBooksListener();
+
+        // 如果在編輯頁面，立即更新書本標題
+        if (editBookPage && !editBookPage.classList.contains('hidden')) {
+            const book = allBooks.find(b => b.id === currentBookId);
+            if (book) {
+                displayBookName.textContent = (book.name === "預設解答之書" || book.name === "Default Answer Book") ? t('defaultBookName') : book.name;
+                inlineEditBookNameInput.value = displayBookName.textContent;
+            }
+        }
+    });
+
     cardFlipArea.addEventListener('click', handleCardClick);
     themeToggleButton.addEventListener('click', toggleTheme);
     settingsButton.addEventListener('click', () => showPage(settingsPage));
     backToHomeButton.addEventListener('click', () => showPage(homePage));
     backToSettingsFromEditButton.addEventListener('click', () => showPage(settingsPage));
+    
+    deleteBookButton.addEventListener('click', () => {
+        if (currentBookId) {
+            showModal(t('deleteBookConfirm'), true, () => deleteBook(currentBookId));
+        }
+    });
     
     addNewBookButton.addEventListener('click', () => createBookModal.classList.remove('hidden'));
     cancelCreateBookButton.addEventListener('click', () => createBookModal.classList.add('hidden'));
@@ -561,4 +757,4 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Firebase 初始化失敗:", error);
         alert("無法連接到後端服務，請稍後再試。");
     }
-});
+})
