@@ -535,14 +535,14 @@ body {
     LIGHT THEME - 柔和漸變風格
 ========================================================================== 
 */
-body.light {
+html.light {
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%, #f8fafc 100%);
     background-attachment: fixed;
     color: #334155;
     position: relative;
 }
 
-body.light::before {
+html.light::before {
     content: '';
     position: fixed;
     top: 0;
@@ -664,14 +664,14 @@ body.light::before {
     DARK THEME - 柔和漸變風格
 ========================================================================== 
 */
-body.dark {
+html.dark {
     background: linear-gradient(135deg, #020617 0%, #0c1120 25%, #020617 50%, #0c1120 75%, #020617 100%);
     background-attachment: fixed;
     color: #94a3b8;
     position: relative;
 }
 
-body.dark::before {
+html.dark::before {
     content: '';
     position: fixed;
     top: 0;

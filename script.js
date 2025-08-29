@@ -37,7 +37,7 @@ let isBooksLoading = true;
 // --- UI Elements ---
 let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal, modalMessage,
     modalConfirmButton, modalCancelButton, modalCloseButton, settingsButton, authButton, themeToggleButton, sunIcon, moonIcon,
-    body, answerBookSelector, noAnswerBooksMessage, answerBooksList, addNewBookButton, backToHomeButton,
+    body, html, answerBookSelector, noAnswerBooksMessage, answerBooksList, addNewBookButton, backToHomeButton,
     createBookModal, createBookNameInput, confirmCreateBookButton, cancelCreateBookButton,
     displayBookName, inlineEditBookNameInput, editBookAnswersCountDisplay, noEditBookAnswersMessage,
     editBookAnswersList, addNewAnswerButton, backToSettingsFromEditButton, deleteBookButton,
@@ -418,8 +418,8 @@ async function handleCardClick() {
 }
 
 function toggleTheme() {
-    body.classList.toggle('dark');
-    body.classList.toggle('light');
+    html.classList.toggle('dark');
+    html.classList.toggle('light');
     sunIcon.classList.toggle('hidden');
     moonIcon.classList.toggle('hidden');
     localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
@@ -588,6 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sunIcon = document.getElementById('sun-icon');
     moonIcon = document.getElementById('moon-icon');
     body = document.body;
+    html = document.documentElement;
     answerBookSelector = document.getElementById('answer-book-selector');
     noAnswerBooksMessage = document.getElementById('no-answer-books-message');
     answerBooksList = document.getElementById('answer-books-list');
@@ -633,8 +634,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. Setup Static Event Listeners ---
     const savedTheme = localStorage.getItem('theme') || 'light';
-    if (savedTheme === 'dark') { body.classList.add('dark'); sunIcon.classList.add('hidden'); moonIcon.classList.remove('hidden'); } 
-    else { body.classList.add('light'); sunIcon.classList.remove('hidden'); moonIcon.classList.add('hidden'); }
+    if (savedTheme === 'dark') { 
+    html.classList.add('dark'); // body -> html
+    html.classList.remove('light'); // 確保移除 light
+    sunIcon.classList.add('hidden'); 
+    moonIcon.classList.remove('hidden'); 
+    } else { 
+    html.classList.add('light'); // body -> html
+    html.classList.remove('dark'); // 確保移除 dark
+    sunIcon.classList.remove('hidden'); 
+    moonIcon.classList.add('hidden'); 
+    }
+    
     languageSelector.value = currentLanguage;
     
     languageSelector.addEventListener('change', (e) => {
