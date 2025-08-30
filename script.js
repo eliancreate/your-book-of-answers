@@ -90,11 +90,12 @@ const translations = {
         addNewAnswerTitle: "新增解答",
         answersInBook: "書本中的解答",
         answersCountUnit: "條",
-        // --- 新增部分 ---
         bookNamePlaceholder: "輸入書本名稱",
         answerTextPlaceholder: "輸入新的解答內容...",
         noBooksMessage: "目前沒有任何解答之書。",
-        noAnswersMessage: "目前沒有任何解答。"
+        noAnswersMessage: "目前沒有任何解答。",
+        updateSuccess: "名稱更新成功！",
+        updateError: "更新失敗，請稍後再試。",
     },
     en: {
         appTitle: "Your Book of Answers",
@@ -137,11 +138,12 @@ const translations = {
         addNewAnswerTitle: "Add New Answer",
         answersInBook: "Answers in Book",
         answersCountUnit: "items",
-        // --- 新增部分 ---
         bookNamePlaceholder: "Enter book name",
         answerTextPlaceholder: "Enter new answer text...",
         noBooksMessage: "No books available.",
-        noAnswersMessage: "No answers available."
+        noAnswersMessage: "No answers available.",
+        updateSuccess: "Name updated successfully!",
+        updateError: "Update failed, please try again later.",
     }
 };
 
@@ -318,11 +320,18 @@ function setupBooksListener() {
 function editBook(bookId) {
     const book = allBooks.find(b => b.id === bookId);
     if (book) {
-        currentBookId = bookId;
-        // --- 修改重點：根據 isDefault 標記來決定顯示名稱 ---
+        currentBookId = bookId; // 更新當前正在編輯的書本ID
+        
         const bookName = book.isDefault ? t('defaultBookName') : book.name;
+        
+        // 僅更新顯示的文字和輸入框的預設值
         displayBookName.textContent = bookName;
         inlineEditBookNameInput.value = bookName;
+        
+        // 確保每次進入時，都是顯示文字而非輸入框
+        displayBookName.classList.remove('hidden');
+        inlineEditBookNameInput.classList.add('hidden');
+        
         showPage(editBookPage);
         setupAnswersListener(book.id);
     }
@@ -484,6 +493,30 @@ async function addNewAnswer(text) {
     } catch (error) {
         console.error("新增答案時出錯:", error);
         showToast("新增失敗，請稍後再試");
+    }
+}
+
+/**
+ * 更新 Firestore 中的書本名稱
+ * @param {string} bookId 要更新的書本 ID
+ * @param {string} newName 新的書本名稱
+ */
+async function updateBookName(bookId, newName) {
+    const trimmedName = newName.trim();
+    // 確保 bookId 和 newName 都存在且不為空
+    if (!userId || !bookId || !trimmedName) return;
+    
+    // 取得該本書在 Firestore 中的參照
+    const bookRef = doc(db, `artifacts/${__app_id}/users/${userId}/answerBooks`, bookId);
+    try {
+        // 使用 updateDoc 來更新 name 欄位
+        await updateDoc(bookRef, {
+            name: trimmedName
+        });
+        showToast(t('updateSuccess')); // 顯示成功訊息
+    } catch (error) {
+        console.error("更新書本名稱失敗:", error);
+        showToast(t('updateError')); // 顯示失敗訊息
     }
 }
 
@@ -680,6 +713,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // --- 書本名稱內聯編輯功能 (完整邏輯) ---
+
+// 1. 點擊書名文字時，切換到編輯模式
+displayBookName.addEventListener('click', () => {
+    // 隱藏書名文字，顯示輸入框
+    displayBookName.classList.add('hidden');
+    inlineEditBookNameInput.classList.remove('hidden');
+    // 自動聚焦到輸入框並選取所有文字，方便使用者直接修改
+    inlineEditBookNameInput.focus();
+    inlineEditBookNameInput.select();
+});
+
+// 2. 定義一個統一的儲存函式
+const saveBookName = () => {
+    const originalName = displayBookName.textContent;
+    const newName = inlineEditBookNameInput.value;
+
+    // 只有在名稱真的被修改過時才儲存
+    if (newName !== originalName) {
+        // 使用全域變數 currentBookId 來知道要更新哪本書
+        updateBookName(currentBookId, newName);
+    }
+
+    // 更新並切換回顯示模式
+    displayBookName.textContent = newName;
+    displayBookName.classList.remove('hidden');
+    inlineEditBookNameInput.classList.add('hidden');
+};
+
+// 3. 當輸入框失去焦點時 (使用者點擊旁邊)，觸發儲存
+inlineEditBookNameInput.addEventListener('blur', saveBookName);
+
+// 4. 當使用者在輸入框中按下特定按鍵時
+inlineEditBookNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        // 按下 Enter 時，觸發儲存
+        saveBookName();
+    } else if (e.key === 'Escape') {
+        // 按下 Escape 時，取消編輯，恢復原狀
+        inlineEditBookNameInput.value = displayBookName.textContent; // 恢復成原始值
+        displayBookName.classList.remove('hidden');
+        inlineEditBookNameInput.classList.add('hidden');
+    }
+});
+
     addNewBookButton.addEventListener('click', () => createBookModal.classList.remove('hidden'));
     cancelCreateBookButton.addEventListener('click', () => createBookModal.classList.add('hidden'));
     confirmCreateBookButton.addEventListener('click', async () => {
