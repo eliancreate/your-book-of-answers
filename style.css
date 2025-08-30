@@ -628,7 +628,8 @@ html.light::before {
 }
 
 /* Lists in Settings/Edit - 柔和質感列表 */
-.light #answer-books-list .book-item {
+.light #answer-books-list .book-item,
+.light #edit-book-answers-list .answer-item {
     background: linear-gradient(145deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.8));
     backdrop-filter: blur(10px);
     border: 1px solid rgba(226, 232, 240, 0.5);
@@ -637,20 +638,14 @@ html.light::before {
         0 2px 8px rgba(0, 0, 0, 0.03),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-.light #answer-books-list .book-item:hover {
+.light #answer-books-list .book-item:hover,
+.light #edit-book-answers-list .answer-item:hover {
     background: linear-gradient(145deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.9));
     border-color: rgba(203, 213, 225, 0.7);
     box-shadow: 
         0 4px 12px rgba(0, 0, 0, 0.05),
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
     transform: translateY(-1px);
-}
-.light #edit-book-answers-list .answer-item {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: none;
-    border-radius: 0;
 }
 
 .light #edit-book-answers-list .answer-display {
@@ -753,7 +748,8 @@ html.dark::before {
 }
 
 /* Lists in Settings/Edit - Dark Theme 柔和質感列表 */
-.dark #answer-books-list .book-item {
+.dark #answer-books-list .book-item,
+.dark #edit-book-answers-list .answer-item {
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(12, 17, 32, 0.8));
     backdrop-filter: blur(10px);
     border: 1px solid rgba(51, 65, 85, 0.6);
@@ -762,7 +758,8 @@ html.dark::before {
         0 2px 8px rgba(0, 0, 0, 0.3),
         inset 0 1px 0 rgba(100, 116, 139, 0.08);
 }
-.dark #answer-books-list .book-item:hover {
+.dark #answer-books-list .book-item:hover,
+.dark #edit-book-answers-list .answer-item:hover {
     background: linear-gradient(145deg, rgba(51, 65, 85, 0.95), rgba(30, 41, 59, 0.9));
     border-color: rgba(71, 85, 105, 0.8);
     box-shadow: 
@@ -770,13 +767,7 @@ html.dark::before {
         inset 0 1px 0 rgba(100, 116, 139, 0.12);
     transform: translateY(-1px);
 }
-.dark #edit-book-answers-list .answer-item {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #334155;
-    box-shadow: none;
-    border-radius: 0;
-}
+
 
 /* --- 返回按鈕樣式 (低調漸層版) --- */
 
@@ -808,30 +799,3 @@ html.dark::before {
     transform: translateY(-1px);
 }
 
-/* --- Select Dropdown Style Normalization --- */
-/* 這段 CSS 的目標是讓 <select> 元素在所有裝置上的外觀盡可能一致。
-*/
-
-#answer-book-selector {
-  /* 1. 移除瀏覽器預設外觀 (最重要的一步) */
-  -webkit-appearance: none;
-  appearance: none;
-
-  /* 2. 設定自訂的下拉箭頭圖示 (使用 SVG) */
-  /* 我們將箭頭圖示作為背景圖片加入 */
-  background-repeat: no-repeat;
-  background-position: right 1rem center; /* 定位在右邊，距離邊緣 1rem */
-  background-size: 1.2em 1.2em; /* 設定箭頭大小 */
-  padding-right: 3rem; /* 增加右邊的內距，避免文字跟箭頭重疊 */
-}
-
-/* 3. 根據淺色/深色模式，提供不同顏色的箭頭 */
-.light #answer-book-selector {
-  /* 淺色模式下的箭頭 (灰色) */
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-}
-
-.dark #answer-book-selector {
-  /* 深色模式下的箭頭 (淺灰色) */
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-}

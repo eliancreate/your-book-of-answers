@@ -96,6 +96,8 @@ const translations = {
         noAnswersMessage: "目前沒有任何解答。",
         updateSuccess: "名稱更新成功！",
         updateError: "更新失敗，請稍後再試。",
+        updateAnswerSuccess: "解答更新成功！",
+        updateAnswerError: "解答更新失敗。",
     },
     en: {
         appTitle: "Your Book of Answers",
@@ -144,6 +146,8 @@ const translations = {
         noAnswersMessage: "No answers available.",
         updateSuccess: "Name updated successfully!",
         updateError: "Update failed, please try again later.",
+        updateAnswerSuccess: "Answer updated successfully!",
+        updateAnswerError: "Failed to update answer.",
     }
 };
 
@@ -343,9 +347,12 @@ function setupAnswersListener(bookId) {
     currentBookId = bookId;
     const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
     const q = query(answersRef, where("bookId", "==", bookId));
+    
     answersUnsubscribe = onSnapshot(q, (snapshot) => {
         currentBookAnswers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        editBookAnswersList.innerHTML = '';
+        editBookAnswersList.innerHTML = ''; // 清空舊列表
+
+        // --- 核心修改：為每個解答動態建立可編輯的元素 ---
         currentBookAnswers.forEach(answer => {
             const li = document.createElement('li');
             li.className = 'flex justify-between items-center p-4 border-b answer-item';
@@ -353,23 +360,73 @@ function setupAnswersListener(bookId) {
             const answerTextContainer = document.createElement('div');
             answerTextContainer.className = 'flex-1 answer-text-container';
             
+            // 1. 建立用於顯示的 <p> 標籤
             const answerDisplay = document.createElement('p');
             answerDisplay.className = 'answer-display cursor-pointer pr-2';
             answerDisplay.textContent = answer.text;
 
+            // 2. 建立用於編輯的 <textarea>，並先隱藏
+            const answerInput = document.createElement('textarea');
+            answerInput.className = 'answer-input w-full p-2 border rounded hidden';
+            answerInput.value = answer.text;
+            answerInput.rows = 3; // 預設高度
+
+            // 3. 建立刪除按鈕
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '&times;';
             deleteBtn.className = 'delete-btn ml-4';
             deleteBtn.title = 'Delete Answer';
+            
+            // --- 為本項目綁定所有事件 ---
+
+            // 點擊文字，進入編輯模式
+            answerDisplay.addEventListener('click', () => {
+                answerDisplay.classList.add('hidden');
+                answerInput.classList.remove('hidden');
+                answerInput.focus();
+                answerInput.select();
+            });
+
+            // 儲存邏輯
+            const saveAnswer = () => {
+                if (answerInput.value.trim() !== answer.text) {
+                    updateAnswer(answer.id, answerInput.value);
+                }
+                // 切換回顯示模式
+                answerDisplay.textContent = answerInput.value.trim();
+                answerDisplay.classList.remove('hidden');
+                answerInput.classList.add('hidden');
+            };
+
+            // 失去焦點時儲存
+            answerInput.addEventListener('blur', saveAnswer);
+
+            // 鍵盤事件 (Enter 儲存, Escape 取消)
+            answerInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { // 按下 Enter (而非 Shift+Enter)
+                    e.preventDefault(); // 防止換行
+                    saveAnswer();
+                } else if (e.key === 'Escape') {
+                    answerInput.value = answer.text; // 恢復原始文字
+                    answerDisplay.classList.remove('hidden');
+                    answerInput.classList.add('hidden');
+                }
+            });
+
+            // 刪除按鈕事件
             deleteBtn.addEventListener('click', () => {
                 showModal(t('deleteAnswerConfirm'), true, () => deleteAnswer(answer.id));
             });
-            
+
+            // 將所有元素組裝起來
             answerTextContainer.appendChild(answerDisplay);
+            answerTextContainer.appendChild(answerInput);
+
             li.appendChild(answerTextContainer);
             li.appendChild(deleteBtn);
             editBookAnswersList.appendChild(li);
         });
+
         editBookAnswersCountDisplay.textContent = currentBookAnswers.length;
         noEditBookAnswersMessage.classList.toggle('hidden', currentBookAnswers.length > 0);
     }, (error) => console.error("答案監聽失敗:", error));
@@ -517,6 +574,30 @@ async function updateBookName(bookId, newName) {
     } catch (error) {
         console.error("更新書本名稱失敗:", error);
         showToast(t('updateError')); // 顯示失敗訊息
+    }
+}
+
+/**
+ * 更新 Firestore 中的解答內容
+ * @param {string} answerId 要更新的解答 ID
+ * @param {string} newText 新的解答內容
+ */
+async function updateAnswer(answerId, newText) {
+    const trimmedText = newText.trim();
+    // 確保 answerId 和 newText 都存在且不為空
+    if (!userId || !answerId || !trimmedText) return;
+
+    // 取得該解答在 Firestore 中的參照
+    const answerRef = doc(db, `artifacts/${__app_id}/users/${userId}/answers`, answerId);
+    try {
+        // 使用 updateDoc 來更新 text 欄位
+        await updateDoc(answerRef, {
+            text: trimmedText
+        });
+        showToast(t('updateAnswerSuccess')); // 顯示成功訊息
+    } catch (error) {
+        console.error("更新解答內容失敗:", error);
+        showToast(t('updateAnswerError')); // 顯示失敗訊息
     }
 }
 
