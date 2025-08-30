@@ -799,3 +799,39 @@ html.dark::before {
     transform: translateY(-1px);
 }
 
+/* --- Toast Message Styles (Simple & Solid) --- */
+.toast-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 1000;
+
+  /* 動畫的初始狀態 (在畫面下方外) */
+  transform: translate(-50%, 150%);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.21, 1.02, 0.73, 1); /* 流暢的彈出動畫 */
+
+  /* 外觀樣式 */
+  padding: 12px 24px;
+  border-radius: 8px; /* 圓角 */
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 柔和的陰影 */
+  pointer-events: none;
+
+  /* 淺色模式 (預設樣式) */
+  background-color: #c9dce6; /* 淺藍色 (Tailwind sky-200) */
+  color: #3c3d3e; /* 近黑色 (Tailwind slate-800) */
+}
+
+/* 動畫的結束狀態 (彈出後的位置) */
+.toast-message.show {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+/* 深色模式 */
+.toast-message.dark {
+  background-color: #232939; /* 深藍色 (Tailwind blue-900) */
+  color: #cbd5e1; /* 淺灰色 (Tailwind slate-300) */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* 深色模式下稍深的陰影 */
+}

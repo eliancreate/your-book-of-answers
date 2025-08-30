@@ -491,11 +491,13 @@ function toggleTheme() {
     localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
 }
 
-function showToast(message, duration = 500) {
+function showToast(message, duration = 1000) {
     const toast = document.createElement('div');
     toast.textContent = message;
     toast.className = 'toast-message';
-    if (document.body.classList.contains('dark')) toast.classList.add('dark');
+     if (document.documentElement.classList.contains('dark')) {
+        toast.classList.add('dark');
+     }
     document.body.appendChild(toast);
     setTimeout(() => toast.classList.add('show'), 10);
     setTimeout(() => {
