@@ -634,6 +634,7 @@ html.light::before {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(226, 232, 240, 0.5);
     color: #475569;
+    transition: all 0.3s ease;
     box-shadow: 
         0 2px 8px rgba(0, 0, 0, 0.03),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -754,6 +755,7 @@ html.dark::before {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(51, 65, 85, 0.6);
     color: #94a3b8;
+    transition: all 0.3s ease;
     box-shadow: 
         0 2px 8px rgba(0, 0, 0, 0.3),
         inset 0 1px 0 rgba(100, 116, 139, 0.08);
@@ -834,4 +836,23 @@ html.dark::before {
   background-color: #232939; /* 深藍色 (Tailwind blue-900) */
   color: #cbd5e1; /* 淺灰色 (Tailwind slate-300) */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* 深色模式下稍深的陰影 */
+}
+
+/* --- 全域元件互動效果 --- */
+
+/* 1. 為所有按鈕和選單設定一個基礎的過渡效果 */
+/* 這能確保它們在被按下和放開時，動畫是流暢的 */
+button,
+select {
+  transition: transform 0.15s ease-out;
+}
+
+/* 2. 設定通用的 :active 按壓回饋樣式 */
+/* 這會應用到所有的 button, select, 以及列表項目上 */
+button:active,
+select:active,
+#answer-books-list .book-item:active,
+#edit-book-answers-list .answer-item:active {
+  transform: scale(0.95); /* 統一的按壓縮小效果 */
+  /* 我們在這裡不改變顏色或亮度，確保效果能通用於所有顏色的按鈕 */
 }

@@ -480,6 +480,10 @@ async function handleCardClick() {
     setTimeout(() => {
         cardContent.textContent = answer;
         cardContent.style.opacity = '1';
+        if (navigator.vibrate) {
+        // 讓手機震動 50 毫秒 (一個短暫、清脆的震動)
+        navigator.vibrate(50);
+        }
     }, 400);
 }
 
