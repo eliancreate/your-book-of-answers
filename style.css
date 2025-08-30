@@ -808,3 +808,30 @@ html.dark::before {
     transform: translateY(-1px);
 }
 
+/* --- Select Dropdown Style Normalization --- */
+/* 這段 CSS 的目標是讓 <select> 元素在所有裝置上的外觀盡可能一致。
+*/
+
+#answer-book-selector {
+  /* 1. 移除瀏覽器預設外觀 (最重要的一步) */
+  -webkit-appearance: none;
+  appearance: none;
+
+  /* 2. 設定自訂的下拉箭頭圖示 (使用 SVG) */
+  /* 我們將箭頭圖示作為背景圖片加入 */
+  background-repeat: no-repeat;
+  background-position: right 1rem center; /* 定位在右邊，距離邊緣 1rem */
+  background-size: 1.2em 1.2em; /* 設定箭頭大小 */
+  padding-right: 3rem; /* 增加右邊的內距，避免文字跟箭頭重疊 */
+}
+
+/* 3. 根據淺色/深色模式，提供不同顏色的箭頭 */
+.light #answer-book-selector {
+  /* 淺色模式下的箭頭 (灰色) */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+.dark #answer-book-selector {
+  /* 深色模式下的箭頭 (淺灰色) */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
