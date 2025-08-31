@@ -207,10 +207,19 @@
         </div>
     </div>
     
-    <div id="create-answer-modal" class="hidden fixed inset-0 flex justify-center items-center p-4 z-50">
+   <div id="create-answer-modal" class="hidden fixed inset-0 flex justify-center items-center p-4 z-50">
         <div class="rounded-lg shadow-xl p-6 w-full max-w-sm">
             <h4 class="text-xl font-bold mb-4 text-center">新增解答</h4>
+            
             <textarea id="create-answer-text-input" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:border-transparent resize-y h-32" placeholder="輸入新的解答內容..."></textarea>
+            
+            <div class="flex items-center justify-center my-4">
+                <label for="batch-toggle" class="flex items-center cursor-pointer">
+                    <input type="checkbox" id="batch-toggle" class="sr-only peer">
+                    <div class="relative w-11 h-6 bg-gray-200 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <span id="batch-toggle-label" class="ml-3 text-sm font-medium">批次新增</span>
+                </label>
+            </div>
             <div class="flex justify-center space-x-4">
                 <button id="confirm-create-answer-button" class="flex-1 font-bold py-2 px-4 rounded-lg text-base shadow-md transition duration-300">
                     確定

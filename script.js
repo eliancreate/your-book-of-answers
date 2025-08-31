@@ -42,6 +42,7 @@ let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal
     displayBookName, inlineEditBookNameInput, editBookAnswersCountDisplay, noEditBookAnswersMessage,
     editBookAnswersList, addNewAnswerButton, backToSettingsFromEditButton, deleteBookButton,
     createAnswerModal, createAnswerTextInput, confirmCreateAnswerButton, cancelCreateAnswerButton,
+    batchToggle, batchToggleLabel, 
     languageSelector, authModal, closeAuthBtn, loginTab, registerTab, loginForm, registerForm, loginEmail,
     loginPassword, registerEmail, registerPassword, registerConfirmPassword, loginButton,
     registerButton, googleLoginButton, guestModeButton, userDisplayName, userEmail, loginRegisterButton,
@@ -98,7 +99,12 @@ const translations = {
         updateError: "更新失敗，請稍後再試。",
         updateAnswerSuccess: "解答更新成功！",
         updateAnswerError: "解答更新失敗。",
+        batchAddToggle: "批次新增",
+
+
+
     },
+
     en: {
         appTitle: "Your Book of Answers",
         cardFrontText: "Click the card to get your answer",
@@ -148,6 +154,7 @@ const translations = {
         updateError: "Update failed, please try again later.",
         updateAnswerSuccess: "Answer updated successfully!",
         updateAnswerError: "Failed to update answer.",
+        batchAddToggle: "Add as Batch",
     }
 };
 
@@ -207,6 +214,7 @@ function updatePageText() {
     if (createAnswerTitle) createAnswerTitle.textContent = t('addNewAnswerTitle');
     setText('confirm-create-answer-button', 'confirm');
     setText('cancel-create-answer-button', 'cancel');
+    setText('batch-toggle-label', 'batchAddToggle');
     setText('create-answer-text-input', 'answerTextPlaceholder', 'placeholder'); // 翻譯 placeholder
 
     // Settings Page & Messages
@@ -607,6 +615,47 @@ async function updateAnswer(answerId, newText) {
     }
 }
 
+/**
+ * 批次新增多筆解答到 Firestore
+ * @param {string} text 包含多行解答的文字
+ */
+async function addAnswersInBatch(text) {
+    if (!userId || !currentBookId || !text.trim()) return;
+
+    // 1. 將輸入的文字分割成陣列，並過濾掉空行
+    const answersArray = text.split('\n')
+                             .map(line => line.trim()) // 去除每行前後的空白
+                             .filter(line => line.length > 0); // 過濾掉空行
+
+    if (answersArray.length === 0) {
+        showToast("請輸入至少一則解答"); // 也可以加入多國語言翻譯
+        return;
+    }
+
+    try {
+        // 2. 使用 WriteBatch 進行一次性寫入，效能更好
+        const batch = writeBatch(db);
+        const answersRef = collection(db, `artifacts/${__app_id}/users/${userId}/answers`);
+
+        answersArray.forEach(answerText => {
+            const newAnswerRef = doc(answersRef); // 為每一筆新解答建立一個參照
+            batch.set(newAnswerRef, {
+                bookId: currentBookId,
+                text: answerText,
+                createdAt: serverTimestamp()
+            });
+        });
+
+        // 3. 提交批次寫入
+        await batch.commit();
+        showToast(`成功新增 ${answersArray.length} 則解答！`); // 也可以加入多國語言翻譯
+
+    } catch (error) {
+        console.error("批次新增解答失敗:", error);
+        showToast("新增失敗，請稍後再試。");
+    }
+}
+
 async function deleteBook(bookId) {
     if (!userId) return;
     try {
@@ -730,6 +779,8 @@ document.addEventListener('DOMContentLoaded', () => {
     createAnswerTextInput = document.getElementById('create-answer-text-input');
     confirmCreateAnswerButton = document.getElementById('confirm-create-answer-button');
     cancelCreateAnswerButton = document.getElementById('cancel-create-answer-button');
+    batchToggle = document.getElementById('batch-toggle'); // <-- 新增
+    batchToggleLabel = document.getElementById('batch-toggle-label');
     languageSelector = document.getElementById('language-selector');
     authModal = document.getElementById('auth-modal');
     closeAuthBtn = document.getElementById('auth-close-button');
@@ -856,15 +907,36 @@ inlineEditBookNameInput.addEventListener('keydown', (e) => {
         } else { showToast(t('bookNameRequired')); }
     });
 
-    addNewAnswerButton.addEventListener('click', () => createAnswerModal.classList.remove('hidden'));
-    cancelCreateAnswerButton.addEventListener('click', () => createAnswerModal.classList.add('hidden'));
+   addNewAnswerButton.addEventListener('click', () => {
+    batchToggle.checked = false; // <-- 新增：重設開關為關閉
+    createAnswerModal.classList.remove('hidden');
+   });
+   cancelCreateAnswerButton.addEventListener('click', () => {
+    batchToggle.checked = false; // <-- 新增：重設開關為關閉
+    createAnswerModal.classList.add('hidden');
+   });
+
+
+    // 為「新增解答」視窗的確認按鈕加上新的智能邏輯
     confirmCreateAnswerButton.addEventListener('click', async () => {
         const text = createAnswerTextInput.value.trim();
-        if (text) {
+        if (!text) {
+            showToast(t('answerTextRequired'));
+            return;
+        }
+
+        // --- 關鍵邏輯：檢查開關的狀態 ---
+        if (batchToggle.checked) {
+            // 如果開關是開啟的，就執行批次新增
+            await addAnswersInBatch(text);
+        } else {
+            // 如果開關是關閉的，就執行單筆新增
             await addNewAnswer(text);
-            createAnswerTextInput.value = '';
-            createAnswerModal.classList.add('hidden');
-        } else { showToast(t('answerTextRequired')); }
+        }
+
+        // 完成後，關閉視窗並清空內容
+        createAnswerTextInput.value = '';
+        createAnswerModal.classList.add('hidden');
     });
     
     loginRegisterButton.addEventListener('click', () => authModal.classList.remove('hidden'));
