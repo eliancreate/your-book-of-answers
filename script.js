@@ -33,6 +33,7 @@ let answersUnsubscribe = null;
 let isCreatingDefaultBook = false;
 let currentLanguage = localStorage.getItem('language') || 'zh';
 let isBooksLoading = true;
+let currentAnswerMode = 'single'; // 'single' 或 'batch'
 
 // --- UI Elements ---
 let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal, modalMessage,
@@ -42,7 +43,7 @@ let homePage, settingsPage, editBookPage, cardFlipArea, cardContent, customModal
     displayBookName, inlineEditBookNameInput, editBookAnswersCountDisplay, noEditBookAnswersMessage,
     editBookAnswersList, addNewAnswerButton, backToSettingsFromEditButton, deleteBookButton,
     createAnswerModal, createAnswerTextInput, confirmCreateAnswerButton, cancelCreateAnswerButton,
-    batchToggle, batchToggleLabel, 
+    singleAnswerTab, batchAnswerTab,
     languageSelector, authModal, closeAuthBtn, loginTab, registerTab, loginForm, registerForm, loginEmail,
     loginPassword, registerEmail, registerPassword, registerConfirmPassword, loginButton,
     registerButton, googleLoginButton, guestModeButton, userDisplayName, userEmail, loginRegisterButton,
@@ -99,7 +100,8 @@ const translations = {
         updateError: "更新失敗，請稍後再試。",
         updateAnswerSuccess: "解答更新成功！",
         updateAnswerError: "解答更新失敗。",
-        batchAddToggle: "批次新增",
+        addSingle: "新增單筆",
+        addAllAsBatch: "批次新增",
 
 
 
@@ -154,7 +156,8 @@ const translations = {
         updateError: "Update failed, please try again later.",
         updateAnswerSuccess: "Answer updated successfully!",
         updateAnswerError: "Failed to update answer.",
-        batchAddToggle: "Add as Batch",
+        addSingle: "Add Single",
+        addAllAsBatch: "Add Batch",
     }
 };
 
@@ -214,7 +217,8 @@ function updatePageText() {
     if (createAnswerTitle) createAnswerTitle.textContent = t('addNewAnswerTitle');
     setText('confirm-create-answer-button', 'confirm');
     setText('cancel-create-answer-button', 'cancel');
-    setText('batch-toggle-label', 'batchAddToggle');
+     setText('single-answer-tab', 'addSingle'); // <-- 新增
+    setText('batch-answer-tab', 'addAllAsBatch');
     setText('create-answer-text-input', 'answerTextPlaceholder', 'placeholder'); // 翻譯 placeholder
 
     // Settings Page & Messages
@@ -779,8 +783,8 @@ document.addEventListener('DOMContentLoaded', () => {
     createAnswerTextInput = document.getElementById('create-answer-text-input');
     confirmCreateAnswerButton = document.getElementById('confirm-create-answer-button');
     cancelCreateAnswerButton = document.getElementById('cancel-create-answer-button');
-    batchToggle = document.getElementById('batch-toggle'); // <-- 新增
-    batchToggleLabel = document.getElementById('batch-toggle-label');
+    singleAnswerTab = document.getElementById('single-answer-tab'); // <-- 新增
+    batchAnswerTab = document.getElementById('batch-answer-tab'); // <-- 新增
     languageSelector = document.getElementById('language-selector');
     authModal = document.getElementById('auth-modal');
     closeAuthBtn = document.getElementById('auth-close-button');
@@ -844,7 +848,6 @@ document.addEventListener('DOMContentLoaded', () => {
     settingsButton.addEventListener('click', () => showPage(settingsPage));
     backToHomeButton.addEventListener('click', () => showPage(homePage));
     backToSettingsFromEditButton.addEventListener('click', () => showPage(settingsPage));
-    
     deleteBookButton.addEventListener('click', () => {
         if (currentBookId) {
             showModal(t('deleteBookConfirm'), true, () => deleteBook(currentBookId));
@@ -907,37 +910,54 @@ inlineEditBookNameInput.addEventListener('keydown', (e) => {
         } else { showToast(t('bookNameRequired')); }
     });
 
-   addNewAnswerButton.addEventListener('click', () => {
-    batchToggle.checked = false; // <-- 新增：重設開關為關閉
-    createAnswerModal.classList.remove('hidden');
-   });
-   cancelCreateAnswerButton.addEventListener('click', () => {
-    batchToggle.checked = false; // <-- 新增：重設開關為關閉
-    createAnswerModal.classList.add('hidden');
-   });
-
-
-    // 為「新增解答」視窗的確認按鈕加上新的智能邏輯
-    confirmCreateAnswerButton.addEventListener('click', async () => {
-        const text = createAnswerTextInput.value.trim();
-        if (!text) {
-            showToast(t('answerTextRequired'));
-            return;
-        }
-
-        // --- 關鍵邏輯：檢查開關的狀態 ---
-        if (batchToggle.checked) {
-            // 如果開關是開啟的，就執行批次新增
-            await addAnswersInBatch(text);
-        } else {
-            // 如果開關是關閉的，就執行單筆新增
-            await addNewAnswer(text);
-        }
-
-        // 完成後，關閉視窗並清空內容
-        createAnswerTextInput.value = '';
-        createAnswerModal.classList.add('hidden');
+// 為「新增解答」視窗的「取消」按鈕加上事件監聽
+    cancelCreateAnswerButton.addEventListener('click', () => {
+        createAnswerModal.classList.add('hidden'); // 隱藏視窗
+        createAnswerTextInput.value = '';      // 清空輸入框內容
     });
+
+   // 為「新增解答」視窗的確認按鈕加上新的 Tab 邏輯
+confirmCreateAnswerButton.addEventListener('click', async () => {
+    const text = createAnswerTextInput.value.trim();
+    if (!text) {
+        showToast(t('answerTextRequired'));
+        return;
+    }
+
+    // --- 關鍵邏輯：檢查目前的模式 ---
+    if (currentAnswerMode === 'batch') {
+        await addAnswersInBatch(text); // 如果是批次模式，呼叫批次函式
+    } else {
+        await addNewAnswer(text); // 否則，呼叫單筆函式
+    }
+
+    createAnswerTextInput.value = '';
+    createAnswerModal.classList.add('hidden');
+});
+
+// --- 新增解答模式 Tab 切換事件 ---
+singleAnswerTab.addEventListener('click', () => {
+    currentAnswerMode = 'single';
+    singleAnswerTab.classList.add('auth-tab-active');
+    batchAnswerTab.classList.remove('auth-tab-active');
+    createAnswerTextInput.placeholder = t('answerTextPlaceholder');
+});
+
+batchAnswerTab.addEventListener('click', () => {
+    currentAnswerMode = 'batch';
+    batchAnswerTab.classList.add('auth-tab-active');
+    singleAnswerTab.classList.remove('auth-tab-active');
+    createAnswerTextInput.placeholder = "每行一則解答..."; // 這裡也可以加入多國語言翻譯
+});
+
+// 每次打開視窗時，重設為單筆模式
+addNewAnswerButton.addEventListener('click', () => {
+    currentAnswerMode = 'single'; // 重設模式
+    singleAnswerTab.classList.add('auth-tab-active'); // 重設 Tab 樣式
+    batchAnswerTab.classList.remove('auth-tab-active');
+    createAnswerTextInput.placeholder = t('answerTextPlaceholder'); // 重設提示文字
+    createAnswerModal.classList.remove('hidden');
+});
     
     loginRegisterButton.addEventListener('click', () => authModal.classList.remove('hidden'));
     closeAuthBtn.addEventListener('click', () => authModal.classList.add('hidden'));

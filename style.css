@@ -208,21 +208,25 @@ body {
 }
 
 /* --- Auth Tabs --- */
-.light #auth-tabs button {
+.light #auth-tabs button,
+.light #answer-add-tabs button {
     background-color: #e5e7eb; /* gray-200 */
     color: #4b5563; /* gray-600 */
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
-.light #auth-tabs .auth-tab-active {
+.light #auth-tabs .auth-tab-active,
+.light #answer-add-tabs .auth-tab-active {
     background-color: #3b82f6; /* blue-500 */
     color: white;
 }
-.dark #auth-tabs button {
+.dark #auth-tabs button,
+.dark #answer-add-tabs button {
     background-color: #374151; /* gray-700 */
     color: #9ca3af; /* gray-400 */
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
-.dark #auth-tabs .auth-tab-active {
+.dark #auth-tabs .auth-tab-active,
+.dark #answer-add-tabs .auth-tab-active {
     background-color: #2563eb; /* blue-600 */
     color: white;
 }
