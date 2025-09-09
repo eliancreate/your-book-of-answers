@@ -72,9 +72,10 @@
                 </p>
             </div>
             <div class="flex justify-center mt-6">
-                <select id="answer-book-selector" class="block w-80 p-2 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-center">
-                    </select>
-            </div>
+            <button id="select-books-button" class="font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-80">
+                選擇解答之書
+            </button>
+        </div>
         </div>
 
         <div id="settings-page" class="hidden w-full max-w-xl rounded-xl shadow-2xl p-6 mt-4">
@@ -231,7 +232,19 @@
             </div>
         </div>
     </div>
-
+    <div id="book-selection-modal" class="hidden fixed inset-0 flex justify-center items-center p-4 z-50 bg-black bg-opacity-50">
+        <div class="rounded-xl shadow-2xl p-6 w-full max-w-sm modal-content flex flex-col" style="max-height: 80vh;">
+            <h4 class="text-xl font-bold mb-4 text-center">選擇要使用的書本</h4>
+            <div id="book-selection-list" class="space-y-3 custom-scrollbar overflow-y-auto flex-1 pr-2">
+                </div>
+            <div class="flex justify-center space-x-4 mt-6">
+                <button id="confirm-book-selection-button" class="flex-1 font-bold py-2.5 px-5 rounded-lg text-base shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                完成
+             </button>
+         </div>
+        </div>
+    </div>
+    
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
